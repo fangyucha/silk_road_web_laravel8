@@ -1,0 +1,1336 @@
+/*字體*/
+span {
+    font-size: 20px;
+}
+
+/* 玩家個人數據 */
+.content {
+    margin: 0px;
+}
+
+.content .user {
+    position: absolute;
+    width: 1530px !important;
+    left: 130px;
+    top: 15px;
+}
+
+/*盤旋顯示*/
+
+.view_h {
+    position: relative;
+}
+
+.butt_h:hover::before {
+    position: absolute;
+    z-index: 1;
+    top: -50px;
+    left: 60px;
+    color: #fff;
+    font-size: 15px;
+    background: #346e7a;
+    padding: 20px;
+    border-radius: 50px;
+    content: '可以建設神廟';
+
+    pointer-events: none;
+}
+
+.view_c {
+    position: relative;
+}
+
+.butt_c:hover::before {
+    position: absolute;
+    z-index: 1;
+    top: -50px;
+    left: 60px;
+    color: #fff;
+    font-size: 15px;
+    background: #346e7a;
+    padding: 20px;
+    border-radius: 50px;
+    content: '可以買賣特產坐騎';
+
+    pointer-events: none;
+}
+
+.view_t {
+    position: relative;
+}
+
+.butt_t:hover::before {
+    position: absolute;
+    z-index: 1;
+    top: -50px;
+    left: 60px;
+    color: #fff;
+    font-size: 15px;
+    background: #346e7a;
+    padding: 20px;
+    border-radius: 50px;
+    content: '可以建設驛站';
+
+    pointer-events: none;
+}
+
+
+/*坐騎欄*/
+
+.ride {
+    position: absolute;
+    top: 50px;
+    left: 1580px;
+    width: 330px;
+    height: 280px;
+    margin: 0px 0px;
+    background-color: #da6b74;
+    border-radius: 20px;
+}
+
+.ride p {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+/*所有玩家數值*/
+.all_users {
+    position: absolute;
+    top: 400px;
+    left: 1580px;
+}
+
+.fa-chess-rook {
+    padding: 5px;
+    font-size: 14px;
+    color: #c94f2d;
+}
+
+table {
+    text-align: center;
+    width: 330px;
+    height: 200px;
+}
+
+/*左側滑出選單欄*/
+
+.nav {
+    position: absolute;
+    top: 15px;
+    left: 15px
+}
+
+.sidenav {
+    height: 100vmax;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #573400;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+
+    opacity: 0.9;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #c5c4c4;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover,
+.offcanvas a:focus {
+    color: #ffffff;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+/*四個動作card*/
+.movement {
+    position: absolute;
+    width: 1000px;
+    top: 600px;
+    left: 250px;
+    opacity: 0.8;
+    z-index: 2;
+}
+
+.card {
+    display: inline-block;
+}
+
+/*動作完成提示*/
+.movement_complete {
+    position: absolute;
+    top: 430px;
+    left: 550px;
+    width: 500px;
+    padding: 5px;
+    opacity: 0.8;
+    z-index: 10;
+
+    background-color: #573400;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    color: #eae6e6;
+}
+
+.movement_complete button {
+    margin-inline: 50px;
+    background-color: #573400;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: #eae6e6;
+    border-color: #eae6e6;
+}
+
+/*移動中*/
+.walking {
+    position: absolute;
+    top: 430px;
+    left: 550px;
+    width: 600px;
+    padding: 5px;
+    opacity: 0.5;
+    z-index: 10;
+
+    background-color: #935902;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    color: #eae6e6;
+
+    pointer-events: none;
+}
+
+/*timer*/
+.timer {
+    position: absolute;
+    top: 50px;
+    left: 700px;
+    width: 100px;
+    padding: 5px;
+    opacity: 0.5;
+    z-index: 10;
+
+    background-color: #935902;
+    text-align: center;
+    font-size: 35px;
+    font-weight: bold;
+    color: #eae6e6;
+
+    pointer-events: none;
+}
+
+/*GM交易商店*/
+.store {
+    position: absolute;
+    top: 150px;
+    left: 280px;
+    width: 1000px;
+    padding: 30px;
+    opacity: 0.9;
+    z-index: 3;
+
+    background-color: #2f2311;
+    font-size: 35px;
+    font-weight: bold;
+    color: #eae6e6;
+}
+
+.store button {
+    position: absolute;
+    right: 30px;
+    top: 30px;
+    margin-inline: 10px;
+    width: 50px;
+    background-color: #573400;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    color: #eae6e6;
+    border-color: #eae6e6;
+}
+
+.buy {
+    height: 300px;
+}
+
+.buy button {
+    position: relative;
+    margin: 40px;
+    margin-top: 0px;
+    margin-bottom: 60px;
+    width: 205px;
+    height: 266px;
+    opacity: 0.5;
+}
+
+.buy button:hover {
+    opacity: 0.7;
+}
+
+.buy button:focus {
+    opacity: 1;
+}
+
+.horse {
+    left: 50px;
+    background-image: url(/img/horse.jpg);
+}
+
+.camel {
+    left: 130px;
+    background-image: url(/img/camel.jpg);
+}
+
+/*六邊形數據*/
+
+
+/*地圖大外框*/
+
+.border {
+    position: absolute;
+    left: 15px;
+    top: 50px;
+    width: 1530px;
+    height: 872px;
+    margin: 0px 0px;
+
+    /*bootstrap預設是border-box  一般不設定是contentt-box*/
+    box-sizing: content-box;
+    /*bootstrap會蓋掉 要加import*/
+    border-style: solid !important;
+    border-width: 15px 15px !important;
+    border-color: #9e998e !important;
+    background-color: #9bdef3 !important;
+
+    line-height: 16px;
+}
+
+@media(max-width:1500px) {
+    body {
+        transform: scale(0.8);
+        transform-origin: 0px;
+    }
+}
+
+@media(max-width:1200px) {
+    body {
+        transform: scale(0.7);
+        transform-origin: 0px;
+    }
+}
+
+@media(max-width:1024px) {
+    body {
+        transform: scale(0.6);
+        transform-origin: 0px;
+    }
+}
+
+
+/*背景海洋
+
+html {
+    background-color: #9bdef3;
+}
+*/
+
+
+/*大城市(city)*/
+
+.Hexagon_c {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #d40d1d;
+    transition: 0.5s;
+}
+
+.Hexagon_c:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #d40d1d transparent transparent;
+    transition: 0.5s;
+}
+
+.Hexagon_c:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #d40d1d;
+    top: 0;
+    transition: 0.5s;
+}
+
+
+/*
+.Hexagon_c:hover {
+    background-color: #bebbb5;
+}
+*/
+
+
+/*小城市(town)*/
+
+.Hexagon_t {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #6c77d3;
+    transition: 0.5s;
+}
+
+.Hexagon_t:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #6c77d3 transparent transparent;
+    transition: 0.5s;
+}
+
+.Hexagon_t:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #6c77d3;
+    top: 0;
+    transition: 0.5s;
+}
+
+
+/*聖地(holy)#eb8c10*/
+
+.Hexagon_h {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #eb7310;
+    transition: 0.5s;
+}
+
+.Hexagon_h:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #eb7310 transparent transparent;
+    transition: 0.5s;
+}
+
+.Hexagon_h:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #eb7310;
+    top: 0;
+    transition: 0.5s;
+}
+
+
+/*草地(grass)*/
+
+.Hexagon_g {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #32a852;
+}
+
+.Hexagon_g:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #32a852 transparent transparent;
+}
+
+.Hexagon_g:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #32a852;
+    top: 0;
+}
+
+
+/*沙地(sand)*/
+
+.Hexagon_s {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #d8c454;
+}
+
+.Hexagon_s:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #d8c454 transparent transparent;
+}
+
+.Hexagon_s:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #d8c454;
+    top: 0;
+}
+
+
+/*山地(mountain)*/
+
+.Hexagon_m {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #855816;
+}
+
+.Hexagon_m:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #855816 transparent transparent;
+}
+
+.Hexagon_m:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #855816;
+    top: 0;
+}
+
+
+/*海洋湖泊(ocean and lake)*/
+
+.Hexagon_o {
+    position: relative;
+    width: 30px;
+    height: 51.96px;
+    margin: 0px 0px;
+    background-color: #9bdef3;
+}
+
+.Hexagon_o:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent #9bdef3 transparent transparent;
+}
+
+.Hexagon_o:after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 30px;
+    border-width: 26px 15px;
+    border-style: solid;
+    border-color: transparent transparent transparent #9bdef3;
+    top: 0;
+}
+
+
+/*六邊形內的按鈕*/
+
+.butt_c {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #d40d1d;
+    cursor: pointer;
+}
+
+.butt_t {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #6c77d3;
+    cursor: pointer;
+}
+
+.butt_h {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #eb7310;
+    cursor: pointer;
+}
+
+.butt_g {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    color: #f1f1f1;
+    border: none;
+    background-color: #32a852;
+    cursor: pointer;
+}
+
+.butt_s {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #d8c454;
+    cursor: pointer;
+}
+
+.butt_m {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #855816;
+    cursor: pointer;
+}
+
+.butt_o {
+    width: 30px;
+    height: 52px;
+    font-size: 15px;
+    border: none;
+    background-color: #9bdef3;
+    cursor: pointer;
+}
+
+
+/*按鈕字型*/
+
+.butt_look {
+    color: #f1f1f1;
+}
+
+
+/*上下座標按鈕*/
+
+.butt_d {
+    width: 30px;
+    height: 26px;
+    font-size: 15px;
+    color: #f1f1f1;
+    border: 1px ridge #bebbb5;
+    background-color: #615e59;
+    cursor: pointer;
+}
+
+
+/*右橫列座標樣式*/
+
+.coordinate_1 {
+    position: relative;
+    width: 30px;
+    height: 26px;
+    margin: 0px 0px;
+    background-color: #615e59;
+}
+
+.coordinate_1:before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 0;
+    height: 0;
+    right: 30px;
+    border-width: 13px 12px;
+    border-style: solid;
+    border-color: transparent #615e59 transparent transparent;
+}
+
+.coordinate_2 {
+    position: relative;
+    width: 26px;
+    height: 31px;
+    margin: 0px 0px;
+    background-color: #615e59;
+}
+
+
+/*右橫列座標按鈕*/
+
+.butt_1 {
+    width: 30px;
+    height: 26px;
+    font-size: 15px;
+    color: #f1f1f1;
+    border: none;
+    background-color: #615e59;
+    cursor: pointer;
+}
+
+.butt_2 {
+    width: 30px;
+    height: 26px;
+    font-size: 15px;
+    color: #f1f1f1;
+    border: none;
+    background-color: #615e59;
+    cursor: pointer;
+}
+
+
+/*右座標列(水平)+56*/
+
+.row_r_1 {
+    position: absolute;
+    margin-top: 17px;
+}
+
+.row_r_2 {
+    position: absolute;
+    margin-top: 45px;
+}
+
+.row_r_3 {
+    position: absolute;
+    margin-top: 73px;
+}
+
+.row_r_4 {
+    position: absolute;
+    margin-top: 101px;
+}
+
+.row_r_5 {
+    position: absolute;
+    margin-top: 129px;
+}
+
+.row_r_6 {
+    position: absolute;
+    margin-top: 157px;
+}
+
+.row_r_7 {
+    position: absolute;
+    margin-top: 185px;
+}
+
+.row_r_8 {
+    position: absolute;
+    margin-top: 213px;
+}
+
+.row_r_9 {
+    position: absolute;
+    margin-top: 241px;
+}
+
+.row_r_10 {
+    position: absolute;
+    margin-top: 269px;
+}
+
+.row_r_11 {
+    position: absolute;
+    margin-top: 297px;
+}
+
+.row_r_12 {
+    position: absolute;
+    margin-top: 325px;
+}
+
+.row_r_13 {
+    position: absolute;
+    margin-top: 353px;
+}
+
+.row_r_14 {
+    position: absolute;
+    margin-top: 381px;
+}
+
+.row_r_15 {
+    position: absolute;
+    margin-top: 409px;
+}
+
+.row_r_16 {
+    position: absolute;
+    margin-top: 437px;
+}
+
+.row_r_17 {
+    position: absolute;
+    margin-top: 465px;
+}
+
+.row_r_18 {
+    position: absolute;
+    margin-top: 493px;
+}
+
+.row_r_19 {
+    position: absolute;
+    margin-top: 521px;
+}
+
+.row_r_20 {
+    position: absolute;
+    margin-top: 549px;
+}
+
+.row_r_21 {
+    position: absolute;
+    margin-top: 577px;
+}
+
+.row_r_22 {
+    position: absolute;
+    margin-top: 605px;
+}
+
+.row_r_23 {
+    position: absolute;
+    margin-top: 633px;
+}
+
+.row_r_24 {
+    position: absolute;
+    margin-top: 661px;
+}
+
+.row_r_25 {
+    position: absolute;
+    margin-top: 689px;
+}
+
+.row_r_26 {
+    position: absolute;
+    margin-top: 717px;
+}
+
+.row_r_27 {
+    position: absolute;
+    margin-top: 745px;
+}
+
+.row_r_28 {
+    position: absolute;
+    margin-top: 773px;
+}
+
+.row_r_29 {
+    position: absolute;
+    margin-top: 801px;
+}
+
+.row_r_30 {
+    position: absolute;
+    margin-top: 829px;
+}
+
+.row_r_31 {
+    position: absolute;
+    margin-top: 857px;
+}
+
+
+/****六角形定位****/
+
+
+/*六角形外框*/
+
+.box {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    display: block;
+}
+
+
+/*欄(垂直)+50*/
+
+.column_1 {
+    position: absolute;
+    margin-left: 4px;
+}
+
+.column_2 {
+    position: absolute;
+    margin-left: 54px;
+}
+
+.column_3 {
+    position: absolute;
+    margin-left: 104px;
+}
+
+.column_4 {
+    position: absolute;
+    margin-left: 154px;
+}
+
+.column_5 {
+    position: absolute;
+    margin-left: 204px;
+}
+
+.column_6 {
+    position: absolute;
+    margin-left: 254px;
+}
+
+.column_7 {
+    position: absolute;
+    margin-left: 304px;
+}
+
+.column_8 {
+    position: absolute;
+    margin-left: 354px;
+}
+
+.column_9 {
+    position: absolute;
+    margin-left: 404px;
+}
+
+.column_10 {
+    position: absolute;
+    margin-left: 454px;
+}
+
+.column_11 {
+    position: absolute;
+    margin-left: 504px;
+}
+
+.column_12 {
+    position: absolute;
+    margin-left: 554px;
+}
+
+.column_13 {
+    position: absolute;
+    margin-left: 604px;
+}
+
+.column_14 {
+    position: absolute;
+    margin-left: 654px;
+}
+
+.column_15 {
+    position: absolute;
+    margin-left: 704px;
+}
+
+.column_16 {
+    position: absolute;
+    margin-left: 754px;
+}
+
+.column_17 {
+    position: absolute;
+    margin-left: 804px;
+}
+
+.column_18 {
+    position: absolute;
+    margin-left: 854px;
+}
+
+.column_19 {
+    position: absolute;
+    margin-left: 904px;
+}
+
+.column_20 {
+    position: absolute;
+    margin-left: 954px;
+}
+
+.column_21 {
+    position: absolute;
+    margin-left: 1004px;
+}
+
+.column_22 {
+    position: absolute;
+    margin-left: 1054px;
+}
+
+.column_23 {
+    position: absolute;
+    margin-left: 1104px;
+}
+
+.column_24 {
+    position: absolute;
+    margin-left: 1154px;
+}
+
+.column_25 {
+    position: absolute;
+    margin-left: 1204px;
+}
+
+.column_26 {
+    position: absolute;
+    margin-left: 1254px;
+}
+
+.column_27 {
+    position: absolute;
+    margin-left: 1304px;
+}
+
+.column_28 {
+    position: absolute;
+    margin-left: 1354px;
+}
+
+.column_29 {
+    position: absolute;
+    margin-left: 1404px;
+}
+
+.column_30 {
+    position: absolute;
+    margin-left: 1454px;
+}
+
+.column_31 {
+    position: absolute;
+    margin-left: 1500px;
+}
+
+
+/*列(水平)+28*/
+
+.row_0 {
+    position: absolute;
+    margin-top: 0px;
+}
+
+.row_1 {
+    position: absolute;
+    margin-top: 4px;
+}
+
+.row_2 {
+    position: absolute;
+    margin-top: 32px;
+}
+
+.row_3 {
+    position: absolute;
+    margin-top: 60px;
+}
+
+.row_4 {
+    position: absolute;
+    margin-top: 88px;
+}
+
+.row_5 {
+    position: absolute;
+    margin-top: 116px;
+}
+
+.row_6 {
+    position: absolute;
+    margin-top: 144px;
+}
+
+.row_7 {
+    position: absolute;
+    margin-top: 172px;
+}
+
+.row_8 {
+    position: absolute;
+    margin-top: 200px;
+}
+
+.row_9 {
+    position: absolute;
+    margin-top: 228px;
+}
+
+.row_10 {
+    position: absolute;
+    margin-top: 256px;
+}
+
+.row_11 {
+    position: absolute;
+    margin-top: 284px;
+}
+
+.row_12 {
+    position: absolute;
+    margin-top: 312px;
+}
+
+.row_13 {
+    position: absolute;
+    margin-top: 340px;
+}
+
+.row_14 {
+    position: absolute;
+    margin-top: 368px;
+}
+
+.row_15 {
+    position: absolute;
+    margin-top: 396px;
+}
+
+.row_16 {
+    position: absolute;
+    margin-top: 424px;
+}
+
+.row_17 {
+    position: absolute;
+    margin-top: 452px;
+}
+
+.row_18 {
+    position: absolute;
+    margin-top: 480px;
+}
+
+.row_19 {
+    position: absolute;
+    margin-top: 508px;
+}
+
+.row_20 {
+    position: absolute;
+    margin-top: 536px;
+}
+
+.row_21 {
+    position: absolute;
+    margin-top: 564px;
+}
+
+.row_22 {
+    position: absolute;
+    margin-top: 592px;
+}
+
+.row_23 {
+    position: absolute;
+    margin-top: 620px;
+}
+
+.row_24 {
+    position: absolute;
+    margin-top: 648px;
+}
+
+.row_25 {
+    position: absolute;
+    margin-top: 676px;
+}
+
+.row_26 {
+    position: absolute;
+    margin-top: 704px;
+}
+
+.row_27 {
+    position: absolute;
+    margin-top: 732px;
+}
+
+.row_28 {
+    position: absolute;
+    margin-top: 760px;
+}
+
+.row_29 {
+    position: absolute;
+    margin-top: 788px;
+}
+
+.row_30 {
+    position: absolute;
+    margin-top: 816px;
+}
+
+.row_31 {
+    position: absolute;
+    margin-top: 846px;
+}
+
+.card {
+    width: 16rem;
+}
+
+/* 蓋建築物加圖片 TODO:不同建築物的圖片*/
+.builded {
+    background-image: url(/img/castle.png);
+    background-size: 30px 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+*/ button {
+    z-index: 2;
+}
+
+.building_img {
+    pointer-events: none;
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    top: 8px;
+    left: 1px;
+}
+
+/**使用者圖片和地圖的標示顯示
+  *img
+*/
+button div[class^="view_"] {
+    pointer-events: none;
+    z-index: 2;
+    /*避免滑鼠事件*/
+}
+
+button img {
+    position: absolute;
+    top: 0;
+    left: 6px;
+}
+
+.player {
+    width: 40px;
+    height: 60px;
+    padding: 0;
+    margin: 0;
+    left: 0px;
+    top: -5px;
+}
+
+[draggable="true"] {
+    cursor: move;
+    /*滑鼠游標樣式*/
+}
+
+/**行走
+  *走過的路+.walked 斜線樣式
+*/
+.walked {
+    background-image:
+        linear-gradient(90deg, rgb(255, 255, 255) 1px, transparent 0),
+        linear-gradient(white 1px, transparent 0);
+    background-size: 14px 14px;
+}
+
+.round_walk {
+    background-image:
+        linear-gradient(90deg, #c7c7c7 1px, transparent 0),
+        linear-gradient(#c7c7c7 1px, transparent 0);
+    background-size: 14px 14px;
+}
+
+div.walked {
+    background-image:
+        linear-gradient(90deg, rgb(255, 255, 255) 1px, transparent 0),
+        linear-gradient(white 1px, transparent 0);
+    background-size: 14px 14px;
+}

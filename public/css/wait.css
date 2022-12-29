@@ -1,0 +1,14 @@
+h1 {
+  font-weight: bold;
+  font-size: 30px;
+  text-align: center;
+}
+
+img.card-img-top {
+  width: 160px;
+  height: 240px;
+}
+
+.d-flex {
+  justify-content: center;
+}

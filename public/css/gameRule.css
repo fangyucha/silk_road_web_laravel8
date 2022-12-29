@@ -1,0 +1,47 @@
+.contents{
+    position:fixed;
+    margin: 35px auto;
+}
+
+.content{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    margin: 35px auto;
+}
+
+.nav-pills .nav-link:link {
+    color: #996515;
+}
+
+.nav-pills .nav-link:visited {
+    color: #996515;
+}
+
+.nav-pills .nav-link.active {
+    color: #996515;
+    background-color: #e6be8a;
+}
+
+.content .scrollspy-example-2 .h4{
+    color: #835510;
+}
+h4{
+   color: #835510;
+   padding-top: 8px;
+   font-weight: bold;
+}
+h5{
+    padding-top: 8px;
+    font-weight: bold;
+}
+
+
+@media (max-width: 768px){
+    .contents {
+        position:relative;
+    }
+    .content {
+        position:relative;
+    }
+}
