@@ -57,76 +57,18 @@ const selector = document.querySelector("#selector")
 const selectValue = document.querySelector("#selectValue")
 const progressBar = document.querySelector("#progressBar")
 //
-const character = "constan" // 玩家身分=[constan, samar, dunhunang, changan]
+let character = document.querySelector(".character").innerHTML.split('\n        ')[1].split('\n')[0] // 玩家身分=[0-constan, 1-samar, 2-dunhunang, 3-changan]
 
 let btn_loc = "" // 位置, 確保建築物蓋在button的背景
 let loc = "" // 地形類別
 let movement_complete_text = "" // 紀錄做的動作
 let trade_target = "" // 紀錄交易的物品
 let attributes = { // 該玩家數值，TODO:僅供demo用，之後要恢復正常預設值
-    money: 100, station: 0, fort: 0, temple: 0, supply: 50
+    money: 10, station: 0, fort: 0, temple: 0, supply: 0
 }
 display_user_attributes(attributes) //刷新玩家數值 TODO:僅供demo用，之後要刪除，確認預設值之後可以設在html(減少刷新)
 let temp_attributes = Object.assign({}, attributes) // 暫存玩家數值，供undo movement
-
-
-
-/* map listener
-panel_map.addEventListener('click', function (event) {
-    panel_movement.style.display = "block"
-    let target = event.target
-
-    //
-    btn_loc = target // 紀錄位置
-    // 判斷點擊的元素，TODO: 之後不是用點擊的，可能要刪除
-    if (btn_loc.classList[0].indexOf("Hexagon") > -1) {
-        // 點擊到button的父元素div
-        btn_loc = btn_loc.children[0]
-    } else if (btn_loc.classList[0].indexOf("view") > -1 | btn_loc.id.indexOf("player") > -1) {
-        // 點擊到button的子元素:字or玩家圖片
-        btn_loc = btn_loc.parentElement
-    } else {
-        // 點擊到button自己
-    }
-
-    // 四個動作card顯示
-    if (btn_loc.classList[0].indexOf('_t') > -1) {
-        // 城鎮
-        loc = "城鎮"
-
-        card_building.style.display = ""
-        card_rob.style.display = ""
-        card_trade.style.display = "none" // 不能交易
-        building_content.textContent = "城鎮：免費建造驛站"
-    } else if (btn_loc.classList[0].indexOf('_h') > -1) {
-        // 聖地
-        loc = "聖地"
-
-        card_building.style.display = ""
-        card_rob.style.display = ""
-        card_trade.style.display = "none" // 不能交易
-        building_content.textContent = "聖地：花 $5 建造神廟"
-    } else if (btn_loc.classList[0].indexOf("_c") > -1) {
-        // 大城市
-        loc = "大城市"
-
-        card_trade.style.display = ""
-        card_building.style.display = "none" // 不能蓋建築
-        card_rob.style.display = "none" // 不能掠奪(沒有建築)
-    } else if (btn_loc.classList[0].indexOf("_o") < 0) {
-        // 其他
-        loc = "其他"
-
-        card_building.style.display = ""
-        card_rob.style.display = ""
-        card_trade.style.display = "none" // 不能交易
-        building_content.textContent = "花 $3 建造要塞"
-    } else {
-        // 水域
-        panel_movement.style.display = "none" // TODO:之後是判斷所在位置之後，這個應該要刪除
-    }
-})
-*/
+let movementType = "" // 紀錄動作類別
 
 /* movement listener */
 $('.card').on('click', function (event) {
@@ -156,6 +98,7 @@ $('.card').on('click', function (event) {
 /* 四個動作function*/
 function walk() {
     movement_complete_text = "移動"
+    movementType = "walk"
     player.addEventListener('dragstart', dragStart)
     player.addEventListener('dragend', dragEnd)
 }
@@ -164,31 +107,34 @@ function walk() {
 function build() {
     if (loc == "城鎮") {
         movement_complete_text = "建造驛站"
+        movementType = 'build_castle'
         //temp_attributes["money"] -= 0 驛站不用錢
         temp_attributes["station"] += 1
 
         let img = new Image()
-        img.src = "./img/station.png"
+        img.src = "../img/station.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
         btn_loc.parentElement.appendChild(img) // 建造
     } else if (loc == "聖地") {
         movement_complete_text = "花費 $5 建造神廟"
+        movementType = 'build_temple'
         temp_attributes["money"] -= 5
         temp_attributes["temple"] += 1
 
         let img = new Image()
-        img.src = "./img/temple.png"
+        img.src = "../img/temple.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
         btn_loc.parentElement.appendChild(img) // 建造
     } else { //其他地形
         movement_complete_text = "花費 $3 建造要塞"
+        movementType = 'build_fort'
         temp_attributes["money"] -= 3
         temp_attributes["fort"] += 1
 
         let img = new Image()
-        img.src = "./img/fortress.png"
+        img.src = "../img/fortress.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
         btn_loc.parentElement.appendChild(img) // 建造
@@ -199,6 +145,7 @@ function build() {
 // 掠奪
 function rob() {
     movement_complete_text = "花費 $3 掠奪"
+    movementType = 'rob'
     temp_attributes["money"] -= 3
     //TODO:判斷有沒有他人的建築，拆除
 }
@@ -207,11 +154,13 @@ function rob() {
 //馬
 function buy_horse() {
     movement_complete_text = "購買坐騎-馬"
+    movementType = 'buy_horse'
     temp_attributes["money"] -= 5
 }
 //駱駝
 function buy_camel() {
     movement_complete_text = "購買坐騎-駱駝"
+    movementType = 'buy_camel'
     temp_attributes["money"] -= 5
 }
 
@@ -291,6 +240,7 @@ function sell() {
             break
 
     }
+    movementType = 'sell'
     temp_attributes["money"] += (unit_price * slider.value)
     temp_attributes["supply"] -= slider.value
 }
@@ -380,6 +330,8 @@ function display_trade_complete(trade) {
  * 取消 -> 重選一次動作
  *
  * */
+
+
 function display_movement_complete() {
     panel_movement_complete.style.display = "block"
     movement_complete_content.textContent = movement_complete_text
@@ -393,6 +345,28 @@ function display_movement_complete() {
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
             doneMovement(current_player_id)
+            console.log('here')
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "/game/doMovement",
+                data: {
+                    "movementType": movementType,
+                    "character": character,
+                    "room_id": room_id,
+                },
+                success: function (data) {
+                    console.log(data)
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            })
+
         } else { /* 取消 */
             panel_movement_complete.style.display = "none"
             panel_movement.style.display = "block" // 再選一次動作
@@ -416,6 +390,27 @@ function display_walk_complete(ev) {
             steps.forEach(e => { e.classList.remove('round_walk') })
             steps.forEach(e => { e.classList.add('walked') })
             doneMovement(current_player_id)
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "/game/doMovement",
+                data: {
+                    "movementType": movementType,
+                    "character": character,
+                    "room_id": room_id,
+                },
+                success: function (data) {
+                    console.log(data)
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            })
         } else { /* 取消 */
             // TODO 檢查哪裡讓event on 兩次
             steps.forEach(e => { e.classList.remove('round_walk') })
@@ -713,10 +708,20 @@ function playerRound(player_id) {
     }
     current_player_id = player_id.split('_')[1]
     timer()
-    player = document.querySelector(`#${player_id}`)
-    console.log(player_id)
-    doMovement()
-    checkGameDone()
+    // TODO: 玩家回合
+    // player = document.querySelector(`#${player_id}`)
+    // console.log(player_id)
+    // doMovement()
+    // checkGameDone()
+    if (character == current_player_id) {
+        player = document.querySelector(`#${player_id}`)
+        console.log(player_id)
+        doMovement()
+        checkGameDone()
+    } else {
+        console.log('不是你的回合')
+        timer.innerText = `玩家${current_player_id}的回合`
+    }
 }
 
 let time_player1 = setTimeout(function () { playerRound('player_1') }, 0)
@@ -776,3 +781,26 @@ function doneMovement(current_player_id) {
     clearTimeout(`time_player${current_player_id}`);
     playerRound(`player_${current_player_id}`)
 }
+
+/* websocket */
+let room_id = window.location.href.split('/').pop()
+
+
+let userInfo = [];
+let gameData = [];
+
+Pusher.logToConsole = true;
+
+Echo.join(`room.${room_id}`)
+    .here((users) => {
+        userInfo = users;
+        // userInfo.forEach(element => {
+        //     element['id'] == Auth:: user() -> id ? my_player_id = element['player_id'] : null;
+        // });
+    })
+    .joining((user) => {
+        //userInfo.push(user);
+    })
+    .listen('.DoMovement', (e) => {
+        console.log('hi')
+    })

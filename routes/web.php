@@ -59,6 +59,12 @@ Route::get('/game/{roomid}', [
     'middleware' => 'auth',
 ]);
 
+Route::post('/game/doMovement', [
+    'uses' => 'GameController@DoMovement',
+    'as' => 'game.DoMovement',
+    'middleware' => 'auth',
+]);
+
 Route::get('/wait', [
     'uses' => 'GameController@connect',
     'as' => 'game.wait',

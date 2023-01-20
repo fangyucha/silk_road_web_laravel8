@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DoMovement;
 use App\Events\RoomFull;
 use App\Models\Game;
 use App\Models\UserGame;
+use App\Models\Round;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,6 +15,7 @@ class GameController extends Controller
     public $model;
     public $userGame;
     public $arrUserId = [];
+    public $gameData = [];
 
     public function __construct(Game $model, UserGame $userGame)
     {
@@ -37,8 +40,8 @@ class GameController extends Controller
         // 沒有遊戲或是遊戲人數已滿，就建立新遊戲
         $game = \App\Models\Game::latest()->first();
         if($game == null||$game->getUserIdNum() == 4){
-            $newgame = $this->createNewGame($request);
-            $roomid = $newgame->id;
+            $game = $this->createNewGame($request);
+            $roomid = $game->id;
         }else{
             $arrUserId = $game->getArrUserId();
             $arrUserId[] = Auth::user()->id;
@@ -49,6 +52,8 @@ class GameController extends Controller
                 broadcast(new RoomFull($roomid));
             }
         }
+        session(['character' => $game->getUserIdNum()]);
+        echo session('character');
         return redirect() -> route("game.waiting",['roomid' => $roomid]);
     }
 
@@ -65,5 +70,22 @@ class GameController extends Controller
 
     public function viewGame(){
         return view('game.game');
+    }
+
+    // 儲存遊戲回合資料
+    public function storeRound($player1, $player2, $player3, $player4, $game_id){
+        $round = new Round($player1, $player2, $player3, $player4, $game_id);
+
+        $round->save();
+        return;
+    }
+
+    // 遊戲進行動作
+    public function DoMovement(Request $request){
+        $OldPlayer = Session::has('player') ? Session::get('player') : null;
+        $player = new Player($OldPlayer, $request->character, $request->roomid);
+        $player->DoMovement($request->movementType); // 執行動作
+        new DoMovement($roomid); // 廣播動作
+        return response()->json($player);
     }
 }

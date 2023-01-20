@@ -4709,6 +4709,10 @@
 
         </div>
     </div>
+
+    <div class="character" style="display:none">
+        {{ Session::get('character') }}
+    </div>
 @endsection
 
 @section('styles')
@@ -4725,4 +4729,5 @@
 
 @section('scripts')
     <script src="{{ asset('js/game.js') }}"></script>
+    <script src="{{ asset('js/rule.js') }}"></script>
 @endsection

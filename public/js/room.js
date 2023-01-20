@@ -21,10 +21,10 @@ Echo.join(`room.${room_id}`)
         arrUserId.splice(index, 1);
         updateNumUser()
     })
-    .listen('RoomFull', (e) => {
-        console.log('full')
-        window.location.href = `/game/${room_id}`
-    })
+// .listen('.RoomFull', (e) => {
+//     console.log('full')
+//     window.location.href = `/game/${room_id}`
+// })
 
 const player1 = document.getElementById('userNum_1');
 const player2 = document.getElementById('userNum_2');
@@ -61,3 +61,7 @@ function updateNumUser() {
     }
 }
 
+//　離開頁面提醒
+$(window).bind('beforeunload', function () {
+    return 'Are you sure you want to leave?';
+});
