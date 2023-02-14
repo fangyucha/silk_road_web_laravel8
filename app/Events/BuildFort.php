@@ -10,13 +10,13 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DoMovement implements ShouldBroadcast
+class BuildFort implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $data;
-    public $steps;
+    public $roomid;
     public $character;
+    public $btn_loc;
 
     /**
      * Create a new event instance.
@@ -26,9 +26,9 @@ class DoMovement implements ShouldBroadcast
     public function __construct($data)
     {
         // walk
-        $this->data = $data->roomid;
-        $this->steps = json_decode($data->steps);
+        $this->roomid = $data->roomid;
         $this->character = $data->character;
+        $this->btn_loc = $data->btn_loc;
     }
 
     /**
@@ -38,10 +38,10 @@ class DoMovement implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PresenceChannel('room.'.$this->data);
+        return new PresenceChannel('room.'.$this->roomid);
     }
     public function broadcastAs()
     {
-        return 'DoMovement';
+        return 'BuildFort';
     }
 }

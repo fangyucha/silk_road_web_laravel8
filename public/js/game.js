@@ -23,15 +23,15 @@ function closeNav() {
 
 // 開啟遊戲規則
 function openRule() {
-    window.open("gameRule", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
+    window.open("../gameRule", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
 }
 // 開啟歷史頁面
 function openHistory() {
-    window.open("index", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
+    window.open("../index", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
 }
 // 開啟開發者頁面
 function openDevelopment() {
-    window.open("gameDevelopment", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
+    window.open("../gameDevelopment", "newwindow", "height=850, width=500, toolbar =no, menubar=no, scrollbars=no, resizable=no, location=no, status=no")
 }
 
 /*===========================================================
@@ -48,6 +48,7 @@ const card_walk = document.querySelector("#walk") // 行走card
 const card_building = document.querySelector("#building") // 建築card
 const card_trade = document.querySelector("#trade") // 交易card
 const card_rob = document.querySelector("#rob") // 掠奪card
+const card_cancel = document.querySelector("#cancel") // 結束card
 const building_content = document.querySelector("#building_content") // 建築的顯示內容
 const user_attributes = document.querySelector("#user_attributes") // 個人數值表
 const movement_complete_content = document.querySelector("#movement_complete_content") // 動作完成提示內容
@@ -57,18 +58,19 @@ const selector = document.querySelector("#selector")
 const selectValue = document.querySelector("#selectValue")
 const progressBar = document.querySelector("#progressBar")
 //
-let character = document.querySelector(".character").innerHTML.split('\n        ')[1].split('\n')[0] // 玩家身分=[0-constan, 1-samar, 2-dunhunang, 3-changan]
+const character = document.querySelector(".character").innerHTML.split('\n        ')[1].split('\n')[0] // 玩家身分=[0-constan, 1-samar, 2-dunhunang, 3-changan]
 
 let btn_loc = "" // 位置, 確保建築物蓋在button的背景
 let loc = "" // 地形類別
 let movement_complete_text = "" // 紀錄做的動作
 let trade_target = "" // 紀錄交易的物品
-let attributes = { // 該玩家數值，TODO:僅供demo用，之後要恢復正常預設值
+let attributes = { // 該玩家數值
     money: 10, station: 0, fort: 0, temple: 0, supply: 0
 }
 display_user_attributes(attributes) //刷新玩家數值 TODO:僅供demo用，之後要刪除，確認預設值之後可以設在html(減少刷新)
 let temp_attributes = Object.assign({}, attributes) // 暫存玩家數值，供undo movement
 let movementType = "" // 紀錄動作類別
+let building = "" // 紀錄建築
 
 /* movement listener */
 $('.card').on('click', function (event) {
@@ -92,6 +94,12 @@ $('.card').on('click', function (event) {
     } else if (target.classList.contains("trade")) {
         // 交易
         display_store()
+    } else if (target.classList.contains("cancel")) {
+        // 取消
+        // TODO 取消
+        movement_complete_text = "結束回合"
+        movementType = "cancel"
+        display_movement_complete()
     }
 })
 
@@ -108,6 +116,7 @@ function build() {
     if (loc == "城鎮") {
         movement_complete_text = "建造驛站"
         movementType = 'build_castle'
+        building = 'castle'
         //temp_attributes["money"] -= 0 驛站不用錢
         temp_attributes["station"] += 1
 
@@ -115,10 +124,12 @@ function build() {
         img.src = "../img/station.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
+        img.id = character // 紀錄建築物屬於誰
         btn_loc.parentElement.appendChild(img) // 建造
     } else if (loc == "聖地") {
         movement_complete_text = "花費 $5 建造神廟"
         movementType = 'build_temple'
+        building = 'temple'
         temp_attributes["money"] -= 5
         temp_attributes["temple"] += 1
 
@@ -126,10 +137,12 @@ function build() {
         img.src = "../img/temple.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
+        img.id = character // 紀錄建築物屬於誰
         btn_loc.parentElement.appendChild(img) // 建造
     } else { //其他地形
         movement_complete_text = "花費 $3 建造要塞"
         movementType = 'build_fort'
+        building = 'fort'
         temp_attributes["money"] -= 3
         temp_attributes["fort"] += 1
 
@@ -137,6 +150,7 @@ function build() {
         img.src = "../img/fortress.png"
         img.draggable = "false"
         img.setAttribute("class", "building_img")
+        img.id = character // 紀錄建築物屬於誰
         btn_loc.parentElement.appendChild(img) // 建造
         //btn_loc.classList.add('builded') // 建造
     }
@@ -147,7 +161,15 @@ function rob() {
     movement_complete_text = "花費 $3 掠奪"
     movementType = 'rob'
     temp_attributes["money"] -= 3
-    //TODO:判斷有沒有他人的建築，拆除
+    //e.nextElementSibling.remove() // 拆除
+}
+// 判斷有沒有他人的建築
+function has_others_building(e, my_character) {
+    let others_building = e.nextElementSibling
+    if (others_building && others_building.id != my_character) { // 有其他玩家的建築
+        return true
+    }
+    return false
 }
 
 // 交易-購買坐騎
@@ -164,13 +186,14 @@ function buy_camel() {
     temp_attributes["money"] -= 5
 }
 
+let sell_benefit = 0 // 賣出特產的利潤
 // 交易-賣出特產
 function sell() {
     let store_loc = btn_loc.children[0].innerText // 現在所在的大城市名稱 [君坦,撒馬,敦煌,長安]
     let unit_price = 0 // 單價
     // 依照不同身分顯示特產名稱;在不同區域販賣的價錢 [constan, samar, dunhunang, changan]
     switch (character) {
-        case 'constan':
+        case 0: //'constan'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 1
@@ -187,7 +210,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個黃金 獲得 $${unit_price * slider.value}`
             break
-        case 'samar':
+        case 1: //'samar'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 2
@@ -204,7 +227,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個香料 獲得 $${unit_price * slider.value}`
             break
-        case 'dunhuang':
+        case 2: //'dunhuang'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 3
@@ -221,7 +244,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個經書 獲得 $${unit_price * slider.value}`
             break
-        case 'changan':
+        case 3: //'changan'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 4
@@ -241,7 +264,8 @@ function sell() {
 
     }
     movementType = 'sell'
-    temp_attributes["money"] += (unit_price * slider.value)
+    sell_benefit = unit_price * slider.value
+    temp_attributes["money"] += sell_benefit
     temp_attributes["supply"] -= slider.value
 }
 
@@ -281,11 +305,13 @@ function display_store() {
             buy_camel()
             display_trade_complete(target)
         } else if (target.id == 'close') {
-            movement_complete_text = "完成交易"
+            movement_complete_text = "確認完成交易"
+            movementType = 'trade'
             display_trade_complete(target)
         }
     })
 }
+
 /* 顯示_交易完成提示 */
 function display_trade_complete(trade) {
     panel_movement_complete.style.display = "block"
@@ -308,6 +334,8 @@ function display_trade_complete(trade) {
             } else if (trade_target.id == "camel") {
                 trade_target.hidden = true // 如果購買坐騎 就隱藏該物品
                 document.querySelector("#ride_camel").style.display = ""
+                step_num += 2
+                step.innerHTML = step_num
                 has_camel = true
             } else if (trade_target.id == "close") {
                 panel_store.style.display = "none" //關閉商店
@@ -315,10 +343,33 @@ function display_trade_complete(trade) {
                 doneMovement(current_player_id)
             }
             display_slider() // 更新slider數值
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "POST",
+                url: "/game/doMovement",
+                data: {
+                    "movementType": movementType,
+                    "character": character,
+                    "roomid": roomid,
+                    "attributes": attributes,
+                },
+                success: function (data) {
+                    console.log(data)
+                },
+                error: function (data) {
+                    console.log(data)
+                }
+            })
+
         } else { /* 取消 */
             panel_movement_complete.style.display = "none"
         }
-
+        $('.movement_complete button').off('click')
 
     })
 }
@@ -330,8 +381,6 @@ function display_trade_complete(trade) {
  * 取消 -> 重選一次動作
  *
  * */
-
-
 function display_movement_complete() {
     panel_movement_complete.style.display = "block"
     movement_complete_content.textContent = movement_complete_text
@@ -345,7 +394,7 @@ function display_movement_complete() {
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
             doneMovement(current_player_id)
-            console.log('here')
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -357,7 +406,8 @@ function display_movement_complete() {
                 data: {
                     "movementType": movementType,
                     "character": character,
-                    "room_id": room_id,
+                    "roomid": roomid,
+                    "btn_loc": btn_loc.id,
                 },
                 success: function (data) {
                     console.log(data)
@@ -371,12 +421,18 @@ function display_movement_complete() {
             panel_movement_complete.style.display = "none"
             panel_movement.style.display = "block" // 再選一次動作
             // 移除建造的標籤 TODO:應該要換個地方驗證
-            btn_loc.classList.remove('builded')
+            //btn_loc.classList.remove('builded')
             btn_loc.parentElement.removeChild(btn_loc.parentElement.childNodes[btn_loc.parentElement.childNodes.length - 1])
         }
+        $('.movement_complete button').off('click') //click事件註銷
 
     })
 }
+
+let otherCastle = 0 //計算是否有其他人的城堡
+let playerInfo = {}
+let steps_id = new Array();
+let steps_id_json;
 
 /* 顯示_行走完成 */
 function display_walk_complete(ev) {
@@ -385,39 +441,53 @@ function display_walk_complete(ev) {
     /*button listener*/
     $('.movement_complete button').one('click', function (event) {
         let target = event.target
+        steps.forEach(e => { steps_id.push(e.id) })
         /* 確認 */
         if (target.id == "do_movement") {
+            ohterCastle = 0 // reset otherCastle
             steps.forEach(e => { e.classList.remove('round_walk') })
-            steps.forEach(e => { e.classList.add('walked') })
-            doneMovement(current_player_id)
+            steps.forEach(e => { e.nextElementSibling ? otherCastle++ : null })
+            steps_id_json = JSON.stringify(steps_id)
 
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            $.ajax({
+            $.ajax({ //walk
                 type: "POST",
                 url: "/game/doMovement",
+                dataType: 'json',
                 data: {
                     "movementType": movementType,
                     "character": character,
-                    "room_id": room_id,
+                    "roomid": roomid,
+                    "stepsCount": steps.length,
+                    "otherCastle": otherCastle,
+                    "steps": steps_id_json, // event pusher
                 },
                 success: function (data) {
+                    playerInfo = data
                     console.log(data)
+                    doMovementAfterWalk()
                 },
                 error: function (data) {
                     console.log(data)
                 }
             })
+
+            steps.forEach(e => { e.classList.add('walked') })
+            //doneMovement(current_player_id) 走路後還可以做動作
+
         } else { /* 取消 */
             // TODO 檢查哪裡讓event on 兩次
             steps.forEach(e => { e.classList.remove('round_walk') })
-            ev.target.parentElement.removeChild(document.getElementById(drag_player))
-            drag_start.appendChild(drag_player_clone)
+            document.getElementById(steps_id.slice(-1)).removeChild(document.getElementById(drag_player))
+            player = drag_player_clone
+            drag_start.appendChild(player)
             panel_movement.style.display = "block" // 再選一次動作
         }
+        $('.movement_complete button').off('click') //click事件註銷
         panel_movement_complete.style.display = "none"
     })
     player.removeEventListener('dragstart', dragStart)
@@ -440,11 +510,12 @@ function display_all_user_attributes() {
 }
 
 /*drag and drop*/
-let player = document.querySelector('#player_1')
+let player = document.querySelector(`#player_${character}`)
 const drop_container = document.querySelectorAll('button[data-role="drag-drop-container"]') // 所有地
 const drop_container_other = document.querySelectorAll('button.butt_c, .butt_t, .butt_h, .butt_g, .butt_m[data-role="drag-drop-container"]') // 除了沙漠的地
 const drop_container_dessert = document.querySelectorAll('button.butt_s[data-role="drag-drop-container"]') // 沙漠
 const step = document.querySelector('#step')
+let drop_players = document.querySelectorAll('img[data-role="player"]') // 所有玩家的位置
 step.innerHTML = parseInt(step.innerHTML) // 將步數轉成數字
 let step_num = 10 // 初始步數
 let steps = Array()
@@ -472,6 +543,8 @@ function dragStart(ev) {
     is_drop = false
     step.innerHTML = step_num
     steps = Array()
+    steps_id = Array()
+    drop_players = document.querySelectorAll('img[data-role="player"]') //所有玩家位置
     // add listener
     if (has_camel) {
         drop_container.forEach(container => {
@@ -489,9 +562,15 @@ function dragStart(ev) {
         })
     }
 
-    // remove listener // 當格不能走
-    ev.target.parentElement.removeEventListener('dragover', cancelDefault)
-    ev.target.parentElement.removeEventListener('dragenter', drageEnter)
+    // remove listener
+    // 當格不能走
+    // ev.target.parentElement.removeEventListener('dragover', cancelDefault)
+    // ev.target.parentElement.removeEventListener('dragenter', drageEnter)
+    // 所有玩家在的格子不能走
+    drop_players.forEach(player => {
+        player.parentElement.removeEventListener('dragover', cancelDefault)
+        player.parentElement.removeEventListener('dragenter', drageEnter)
+    })
 }
 function dragEnd(ev) {
     if (is_drop) {
@@ -561,8 +640,9 @@ function drageEnter(ev) {
     }
 
     // 檢查步數用完了沒
-    if (stepIsRunOut(step_spent, target)) {
+    if (stepIsRunOut(step_spent, target) || target.classList.value.indexOf("player") > -1) {
         // 不能走了
+        // 步數用完 or 有人
     } else {
         [preX, preY] = [currentX, currentY]
         target.classList.add('round_walk')
@@ -641,10 +721,10 @@ window.onload = WinOnResize
 
 // 遊戲迴圈
 let players_attributes = {
-    "player_1": { money: 100, station: 0, fort: 0, temple: 0, supply: 50 },
+    "player_0": { money: 100, station: 0, fort: 0, temple: 0, supply: 50 },
+    "player_1": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
     "player_2": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
     "player_3": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_4": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
 }
 let game_is_done = false // 遊戲結束
 
@@ -664,19 +744,72 @@ function doMovement() {
     if (btn_loc.classList[0].indexOf('_t') > -1) {
         // 城鎮
         loc = "城鎮"
-
+        card_walk.style.display = ""
         card_building.style.display = ""
-        card_rob.style.display = ""
         card_trade.style.display = "none" // 不能交易
         building_content.textContent = "城鎮：免費建造驛站"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
+    } else if (btn_loc.classList[0].indexOf('_h') > -1) {
+        // 聖地
+        loc = "聖地"
+        card_walk.style.display = ""
+        card_building.style.display = ""
+        card_trade.style.display = "none" // 不能交易
+        building_content.textContent = "聖地：花 $5 建造神廟"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
+    } else if (btn_loc.classList[0].indexOf("_c") > -1) {
+        // 大城市
+        loc = "大城市"
+        card_walk.style.display = ""
+        card_trade.style.display = ""
+        card_building.style.display = "none" // 不能蓋建築
+        card_rob.style.display = "none" // 不能掠奪(沒有建築)
+    } else if (btn_loc.classList[0].indexOf("_o") < 0) {
+        // 其他
+        loc = "其他"
+        card_walk.style.display = ""
+        card_building.style.display = ""
+        card_trade.style.display = "none" // 不能交易
+        building_content.textContent = "花 $3 建造要塞"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
+    } else {
+        // 水域
+        panel_movement.style.display = "none" // TODO:之後是判斷所在位置之後，這個應該要刪除
+    }
+}
+
+function doMovementAfterWalk() {
+    panel_movement.style.display = "block"
+
+    btn_loc = player.parentElement // 紀錄位置
+
+    // 四個動作card顯示
+    if (btn_loc.classList[0].indexOf('_t') > -1) {
+        // 城鎮
+        loc = "城鎮"
+
+        card_building.style.display = ""
+        card_trade.style.display = "none" // 不能交易
+        building_content.textContent = "城鎮：免費建造驛站"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
     } else if (btn_loc.classList[0].indexOf('_h') > -1) {
         // 聖地
         loc = "聖地"
 
         card_building.style.display = ""
-        card_rob.style.display = ""
         card_trade.style.display = "none" // 不能交易
         building_content.textContent = "聖地：花 $5 建造神廟"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
     } else if (btn_loc.classList[0].indexOf("_c") > -1) {
         // 大城市
         loc = "大城市"
@@ -689,13 +822,17 @@ function doMovement() {
         loc = "其他"
 
         card_building.style.display = ""
-        card_rob.style.display = ""
         card_trade.style.display = "none" // 不能交易
         building_content.textContent = "花 $3 建造要塞"
+        if (has_others_building(btn_loc, character)) {
+            card_rob.style.display = ""
+        }
     } else {
         // 水域
         panel_movement.style.display = "none" // TODO:之後是判斷所在位置之後，這個應該要刪除
     }
+    card_cancel.style.display = ""
+    card_walk.style.display = "none"
 }
 
 let current_player_id = 0 //當前玩家
@@ -707,7 +844,7 @@ function playerRound(player_id) {
         panel_walking.style.display = "block" // 顯示遊戲結束
     }
     current_player_id = player_id.split('_')[1]
-    timer()
+
     // TODO: 玩家回合
     // player = document.querySelector(`#${player_id}`)
     // console.log(player_id)
@@ -716,18 +853,22 @@ function playerRound(player_id) {
     if (character == current_player_id) {
         player = document.querySelector(`#${player_id}`)
         console.log(player_id)
+        timer()
         doMovement()
         checkGameDone()
     } else {
         console.log('不是你的回合')
-        timer.innerText = `玩家${current_player_id}的回合`
+        p = parseInt(current_player_id) + 1
+        timer_panel.innerText = `玩家 ${p} 的回合`
     }
 }
+let p = 0 // 紀錄玩家回合
 
-let time_player1 = setTimeout(function () { playerRound('player_1') }, 0)
-let time_player2 = setTimeout(function () { playerRound('player_2') }, 1000000)
-let time_player3 = setTimeout(function () { playerRound('player_3') }, 2000000)
-let time_player4 = setTimeout(function () { playerRound('player_4') }, 3000000)
+// TODO: delete
+let time_player1 = setTimeout(function () { playerRound('player_0') }, 0)
+let time_player2 = setTimeout(function () { playerRound('player_1') }, 1000000)
+let time_player3 = setTimeout(function () { playerRound('player_2') }, 2000000)
+let time_player4 = setTimeout(function () { playerRound('player_3') }, 3000000)
 
 function round() { // TODO:每輪1000秒
     time_player1
@@ -738,15 +879,15 @@ function round() { // TODO:每輪1000秒
 
 function win() { // return winner
     let money_arr = Array()
-    for (let i = 1; i++; i <= 4) {
-        money_arr.push(players_attributes[`player_${i}`])
+    for (let i = 0; i++; i <= 3) {
+        money_arr.push(players_attributes[`player_${i} `])
     }
     let winner = Math.max(...money_arr)
     return winner
 }
 
 function checkGameDone() { //TODO:四個遊戲結束任務
-    if (players_attributes['player_1']['money'] == 101) {
+    if (players_attributes['player_0']['money'] == 101) {
         game_is_done = true
     }
 }
@@ -754,36 +895,38 @@ function checkGameDone() { //TODO:四個遊戲結束任務
 stratGame()
 setInterval(function () { round() }, 4000000) //TODO:4000秒一輪
 
+let timer_panel = document.querySelector(".timer");
 let time_timer = null
-let used_time = 0
+let time_used = 0
 
 function timer(flag) {
     //   按下 start 後 id 為 timer 的 DIV 內容可以開始倒數到到 0。
-    let timer = document.querySelector(".timer");
-    used_time = 0;
+    time_used = 0;
 
     if (time_timer) {
         clearInterval(time_timer);
         time_timer = null;
     }
     time_timer = setInterval(function () {
-        used_time++;
-        timer.innerText = used_time
+        time_used++;
+        timer_panel.innerText = time_used
     }, 1000);
 }
 
 function doneMovement(current_player_id) {
-    if (current_player_id == 4) {
-        current_player_id = 1
+    if (current_player_id == 3) {
+        current_player_id = 0
     } else {
         current_player_id++;
     }
-    clearTimeout(`time_player${current_player_id}`);
+    clearTimeout(`time_player${current_player_id} `);
+    clearInterval(time_timer);
+    time_timer = null;
     playerRound(`player_${current_player_id}`)
 }
 
 /* websocket */
-let room_id = window.location.href.split('/').pop()
+let roomid = window.location.href.split('/').pop()
 
 
 let userInfo = [];
@@ -791,7 +934,7 @@ let gameData = [];
 
 Pusher.logToConsole = true;
 
-Echo.join(`room.${room_id}`)
+Echo.join(`room.${roomid}`)
     .here((users) => {
         userInfo = users;
         // userInfo.forEach(element => {
@@ -802,5 +945,60 @@ Echo.join(`room.${room_id}`)
         //userInfo.push(user);
     })
     .listen('.DoMovement', (e) => {
-        console.log('hi')
+        console.log(e)
+        dd = e
+        let lastBtn = e.steps.slice(-1)
+        e.steps.forEach(e => { document.querySelector(`#${e}`).classList.add('walked') })
+        e.character
+        document.querySelector(`#${lastBtn}`).appendChild(document.getElementById(`player_${e.character}`))
+        //doneMovement(e.character) 不會進入下一位
     })
+    .listen('.BuildFort', (e) => {
+        console.log(e)
+
+        let img = new Image()
+        img.src = "../img/fortress.png"
+        img.draggable = "false"
+        img.setAttribute("class", "building_img")
+        img.id = e.character // 紀錄建築物屬於誰
+        document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+        doneMovement(e.character)
+    })
+    .listen('.BuildTemple', (e) => {
+        console.log(e)
+
+        let img = new Image()
+        img.src = "../img/temple.png"
+        img.draggable = "false"
+        img.setAttribute("class", "building_img")
+        img.id = e.character // 紀錄建築物屬於誰
+        document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+        doneMovement(e.character)
+    })
+    .listen('.BuildCastle', (e) => {
+        console.log(e)
+
+        let img = new Image()
+        img.src = "../img/station.png"
+        img.draggable = "false"
+        img.setAttribute("class", "building_img")
+        img.id = e.character // 紀錄建築物屬於誰
+        document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+        doneMovement(e.character)
+    })
+    .listen('.Rob', (e) => {
+        console.log(e)
+        let place = document.querySelector(`#${e.btn_loc}`)
+        place.parentElement.removeChild(place.parentElement.childNodes[place.parentElement.childNodes.length - 1])
+        doneMovement(e.character)
+    })
+    .listen('.Trade', (e) => {
+        console.log(e)
+        doneMovement(e.character)
+    })
+    .listen('.Cancel', (e) => {
+        console.log(e)
+        doneMovement(e.character)
+    })
+
+let dd;

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Events\DoMovement;
+use App\Events\WalkUpdate;
 use App\Events\RoomFull;
 use App\Models\Game;
 use App\Models\UserGame;
 use App\Models\Round;
+use App\Player;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -82,10 +84,13 @@ class GameController extends Controller
 
     // 遊戲進行動作
     public function DoMovement(Request $request){
-        $OldPlayer = Session::has('player') ? Session::get('player') : null;
+        $OldPlayer = $request->session()->has('player') ? $request->session()->get('player') : null;
         $player = new Player($OldPlayer, $request->character, $request->roomid);
-        $player->DoMovement($request->movementType); // 執行動作
-        new DoMovement($roomid); // 廣播動作
+        $player::doMovement($request->movementType, $request); // 執行動作
+        //broadcast(new DoMovement($request))->toOthers();
+        //event(new WalkUpdate($request));
+        $request->session()->put('player', $player);
         return response()->json($player);
+        //return response()->json($request->attributes);
     }
 }
