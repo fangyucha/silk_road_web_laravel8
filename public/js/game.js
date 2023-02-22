@@ -59,8 +59,9 @@ const selectValue = document.querySelector("#selectValue")
 const progressBar = document.querySelector("#progressBar")
 //
 const character = document.querySelector(".character").innerHTML.split('\n        ')[1].split('\n')[0] // 玩家身分=[0-constan, 1-samar, 2-dunhunang, 3-changan]
-
-let btn_loc = "" // 位置, 確保建築物蓋在button的背景
+let player = document.querySelector(`#player_${character}`)
+let btn_loc = player.parentElement // 位置, 確保建築物蓋在button的背景
+let pre_btn_loc = ""
 let loc = "" // 地形類別
 let movement_complete_text = "" // 紀錄做的動作
 let trade_target = "" // 紀錄交易的物品
@@ -187,13 +188,13 @@ function buy_camel() {
 }
 
 let sell_benefit = 0 // 賣出特產的利潤
+let unit_price = 0
 // 交易-賣出特產
 function sell() {
     let store_loc = btn_loc.children[0].innerText // 現在所在的大城市名稱 [君坦,撒馬,敦煌,長安]
-    let unit_price = 0 // 單價
     // 依照不同身分顯示特產名稱;在不同區域販賣的價錢 [constan, samar, dunhunang, changan]
     switch (character) {
-        case 0: //'constan'
+        case '0': //'constan'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 1
@@ -210,7 +211,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個黃金 獲得 $${unit_price * slider.value}`
             break
-        case 1: //'samar'
+        case '1': //'samar'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 2
@@ -227,7 +228,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個香料 獲得 $${unit_price * slider.value}`
             break
-        case 2: //'dunhuang'
+        case '2': //'dunhuang'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 3
@@ -244,7 +245,7 @@ function sell() {
             }
             movement_complete_text = `賣出${slider.value}個經書 獲得 $${unit_price * slider.value}`
             break
-        case 3: //'changan'
+        case '3': //'changan'
             switch (store_loc) {
                 case '君堡':
                     unit_price = 4
@@ -323,6 +324,7 @@ function display_trade_complete(trade) {
         /* 確認 */
         if (target.id == "do_movement") {
             panel_movement_complete.style.display = "none"
+            pre_btn_loc.style.border = "";
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
 
@@ -391,6 +393,7 @@ function display_movement_complete() {
         /* 確認 */
         if (target.id == "do_movement") {
             panel_movement_complete.style.display = "none"
+            pre_btn_loc.style.border = "";
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
             doneMovement(current_player_id)
@@ -469,6 +472,7 @@ function display_walk_complete(ev) {
                 success: function (data) {
                     playerInfo = data
                     console.log(data)
+                    pre_btn_loc.style.border = ""
                     doMovementAfterWalk()
                 },
                 error: function (data) {
@@ -510,7 +514,6 @@ function display_all_user_attributes() {
 }
 
 /*drag and drop*/
-let player = document.querySelector(`#player_${character}`)
 const drop_container = document.querySelectorAll('button[data-role="drag-drop-container"]') // 所有地
 const drop_container_other = document.querySelectorAll('button.butt_c, .butt_t, .butt_h, .butt_g, .butt_m[data-role="drag-drop-container"]') // 除了沙漠的地
 const drop_container_dessert = document.querySelectorAll('button.butt_s[data-role="drag-drop-container"]') // 沙漠
@@ -735,10 +738,45 @@ function stratGame() {
     round()
 }
 
+/* 檢查金錢為正 */
+function checkMoney(money) {
+    if (money < 0) {
+
+    }
+}
+
+/* 回合結束更新資料 */
+function roundFinised() {
+    attributes["supply"]++ //特產++
+    attributes["money"] += attributes["station"] //驛站獲得$1
+    display_user_attributes(attributes)
+}
+
+let color = ''
+function colorDe() {
+    switch (character) {
+        case '0': //'constan'
+            color = '#930093'
+            break
+        case '1':
+            color = '#F9F900'
+            break
+        case '2':
+            color = '#C7C7E2'
+            break
+        case '3':
+            color = '#FF7575'
+            break
+
+    }
+}
+colorDe()
+
 function doMovement() {
     panel_movement.style.display = "block"
-
+    pre_btn_loc = btn_loc
     btn_loc = player.parentElement // 紀錄位置
+    btn_loc.style.border = `thick solid ${color}`;
 
     // 四個動作card顯示
     if (btn_loc.classList[0].indexOf('_t') > -1) {
@@ -786,8 +824,9 @@ function doMovement() {
 
 function doMovementAfterWalk() {
     panel_movement.style.display = "block"
-
+    pre_btn_loc = btn_loc
     btn_loc = player.parentElement // 紀錄位置
+    btn_loc.style.border = `thick solid ${color}`;
 
     // 四個動作card顯示
     if (btn_loc.classList[0].indexOf('_t') > -1) {
@@ -916,9 +955,11 @@ function timer(flag) {
 function doneMovement(current_player_id) {
     if (current_player_id == 3) {
         current_player_id = 0
+        attributes['supply']++
     } else {
         current_player_id++;
     }
+    display_user_attributes(attributes)
     clearTimeout(`time_player${current_player_id} `);
     clearInterval(time_timer);
     time_timer = null;
