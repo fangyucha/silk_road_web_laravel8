@@ -26,9 +26,9 @@ class Trade implements ShouldBroadcast
     public function __construct($data)
     {
         // walk
-        $this->roomid = $data->roomid;
-        $this->character = $data->character;
-        $this->attributes = $data->attributes;
+        $this->roomid = $_POST["roomid"];
+        $this->character = $_POST["character"];
+        $this->attributes = json_decode($_POST["attributes"]);
     }
 
     /**

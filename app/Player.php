@@ -67,7 +67,7 @@ class Player
             //return $this->stepsCount;
         }elseif ($movementType == 'trade'){
             //$this->trade();//2
-            broadcast(new Trade($movementData))->toOthers(); // 交易
+            broadcast(new Trade($movementData)); // 交易
         }elseif($movementType == 'sell'){
             $this->sell();//3
         }elseif($movementType == 'buy_camel'){

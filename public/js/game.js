@@ -51,6 +51,7 @@ const card_rob = document.querySelector("#rob") // 掠奪card
 const card_cancel = document.querySelector("#cancel") // 結束card
 const building_content = document.querySelector("#building_content") // 建築的顯示內容
 const user_attributes = document.querySelector("#user_attributes") // 個人數值表
+const all_users_attributes = document.querySelector("#users-data")
 const movement_complete_content = document.querySelector("#movement_complete_content") // 動作完成提示內容
 // slider
 const slider = document.querySelector("#slider")
@@ -76,6 +77,7 @@ let building = "" // 紀錄建築
 /* movement listener */
 $('.card').on('click', function (event) {
     panel_movement.style.display = "none"
+    document.getElementById("do_movement").hidden = false
     let target = event.target
 
     temp_attributes = Object.assign({}, attributes) // 暫存玩家當前數值
@@ -133,7 +135,14 @@ function build() {
         building = 'temple'
         temp_attributes["money"] -= 5
         temp_attributes["temple"] += 1
-
+        //檢查錢
+        if (temp_attributes["money"] < 0) {
+            movement_complete_text = "軍餉不足"
+            document.getElementById("do_movement").hidden = true
+            temp_attributes["money"] += 5
+            temp_attributes["temple"] -= 1
+            return
+        }
         let img = new Image()
         img.src = "../img/temple.png"
         img.draggable = "false"
@@ -146,6 +155,14 @@ function build() {
         building = 'fort'
         temp_attributes["money"] -= 3
         temp_attributes["fort"] += 1
+        // 檢查錢
+        if (temp_attributes["money"] < 0) {
+            movement_complete_text = "軍餉不足"
+            document.getElementById("do_movement").hidden = true
+            temp_attributes["money"] += 3
+            temp_attributes["fort"] -= 1
+            return
+        }
 
         let img = new Image()
         img.src = "../img/fortress.png"
@@ -162,6 +179,13 @@ function rob() {
     movement_complete_text = "花費 $3 掠奪"
     movementType = 'rob'
     temp_attributes["money"] -= 3
+    //檢查錢
+    if (temp_attributes["money"] < 0) {
+        movement_complete_text = "軍餉不足"
+        document.getElementById("do_movement").hidden = true
+        temp_attributes["money"] += 3
+        return
+    }
     //e.nextElementSibling.remove() // 拆除
 }
 // 判斷有沒有他人的建築
@@ -179,12 +203,28 @@ function buy_horse() {
     movement_complete_text = "購買坐騎-馬"
     movementType = 'buy_horse'
     temp_attributes["money"] -= 5
+
+    //檢查錢
+    if (temp_attributes["money"] < 0) {
+        movement_complete_text = "軍餉不足"
+        document.getElementById("do_movement").hidden = true
+        temp_attributes["money"] += 5
+        return
+    }
 }
 //駱駝
 function buy_camel() {
     movement_complete_text = "購買坐騎-駱駝"
     movementType = 'buy_camel'
     temp_attributes["money"] -= 5
+
+    // 檢查錢
+    if (temp_attributes["money"] < 0) {
+        movement_complete_text = "軍餉不足"
+        document.getElementById("do_movement").hidden = true
+        temp_attributes["money"] += 5
+        return
+    }
 }
 
 let sell_benefit = 0 // 賣出特產的利潤
@@ -295,6 +335,7 @@ function display_store() {
     panel_store.style.display = "block"
     /* GM商店 listener */
     $('.store').on('click', function (event) {
+        document.getElementById("do_movement").hidden = false
         let target = event.target
         if (target.id == 'sell') {
             sell()
@@ -343,30 +384,34 @@ function display_trade_complete(trade) {
                 panel_store.style.display = "none" //關閉商店
                 $('.store').off('click') // 商店的click事件註銷
                 doneMovement(current_player_id)
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                console.log('trade')
+                $.ajax({
+                    type: "POST",
+                    url: "/game/doMovement",
+
+                    data: {
+                        "movementType": movementType,
+                        "character": character,
+                        "roomid": roomid,
+                        "attributes": JSON.stringify(attributes),
+                    },
+                    success: function (data) {
+                        console.log(data)
+                    },
+                    error: function (data) {
+                        console.log(data)
+                        console.log('fail')
+                    }
+                })
+
             }
             display_slider() // 更新slider數值
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            $.ajax({
-                type: "POST",
-                url: "/game/doMovement",
-                data: {
-                    "movementType": movementType,
-                    "character": character,
-                    "roomid": roomid,
-                    "attributes": attributes,
-                },
-                success: function (data) {
-                    console.log(data)
-                },
-                error: function (data) {
-                    console.log(data)
-                }
-            })
 
         } else { /* 取消 */
             panel_movement_complete.style.display = "none"
@@ -509,8 +554,49 @@ function display_user_attributes(attributes) {
 }
 
 // TODO:所有玩家數值
-function display_all_user_attributes() {
+function display_all_user_attributes(players_attributes) {
+    all_users_attributes.innerHTML = ""
+    // 拜占庭
+    $.each(players_attributes, function (key, value) {
+        all_users_attributes.innerHTML += `<tr>`
+        all_users_attributes.innerHTML += `<td> <span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>`
+        all_users_attributes.innerHTML += "<td>"
+        all_users_attributes.innerHTML += value.money
+        all_users_attributes.innerHTML += "</td>"
+        all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td>`
+        all_users_attributes.innerHTML += `</tr>`
+    })
+    all_users_attributes.innerHTML += `<tr>`
+    all_users_attributes.innerHTML += `<td> <span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>`
+    $.each((players_attributes['player_0']), function (key, value) {
+        all_users_attributes.innerHTML += "<td>"
+        all_users_attributes.innerHTML += value
+        all_users_attributes.innerHTML += "</td>"
+    })
+    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td>`
+    all_users_attributes.innerHTML += `</tr>`
+    // 阿拉伯
+    all_users_attributes.innerHTML += `<tr>
+        <td> <span><i class="fa-solid fa-chess-rook"></i>阿拉伯帝國</span></td>`
+    $.each((players_attributes['player_1']), function (key, value) {
+        all_users_attributes.innerHTML += `<td>${value}</td>`
+    })
+    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
+    // 笈多
+    all_users_attributes.innerHTML += `<tr>
+        <td> <span><i class="fa-solid fa-chess-rook"></i>笈多帝國</span></td>`
+    $.each((players_attributes['player_2']), function (key, value) {
+        all_users_attributes.innerHTML += `<td>${value}</td>`
+    })
+    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
 
+    // 唐
+    all_users_attributes.innerHTML += `<tr>
+        <td> <span><i class="fa-solid fa-chess-rook"></i>唐帝國</span></td>`
+    $.each((players_attributes['player_3']), function (key, value) {
+        all_users_attributes.innerHTML += `<td>${value}</td>`
+    })
+    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
 }
 
 /*drag and drop*/
@@ -724,10 +810,10 @@ window.onload = WinOnResize
 
 // 遊戲迴圈
 let players_attributes = {
-    "player_0": { money: 100, station: 0, fort: 0, temple: 0, supply: 50 },
-    "player_1": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_2": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_3": { money: 0, station: 0, fort: 0, temple: 0, supply: 0 },
+    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
+    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
+    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
+    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
 }
 let game_is_done = false // 遊戲結束
 
@@ -741,7 +827,7 @@ function stratGame() {
 /* 檢查金錢為正 */
 function checkMoney(money) {
     if (money < 0) {
-
+        return false
     }
 }
 
@@ -926,7 +1012,7 @@ function win() { // return winner
 }
 
 function checkGameDone() { //TODO:四個遊戲結束任務
-    if (players_attributes['player_0']['money'] == 101) {
+    if (players_attributes['player_0']["money"] == 101) {
         game_is_done = true
     }
 }
@@ -960,6 +1046,7 @@ function doneMovement(current_player_id) {
         current_player_id++;
     }
     display_user_attributes(attributes)
+    //display_all_user_attributes(players_attributes)
     clearTimeout(`time_player${current_player_id} `);
     clearInterval(time_timer);
     time_timer = null;
