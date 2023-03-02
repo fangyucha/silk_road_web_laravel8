@@ -60,8 +60,3 @@ function updateNumUser() {
             break;
     }
 }
-
-//　離開頁面提醒
-$(window).bind('beforeunload', function () {
-    return 'Are you sure you want to leave?';
-});

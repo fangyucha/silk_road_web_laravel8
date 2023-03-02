@@ -888,7 +888,12 @@ function checkMoney(money) {
 function roundFinised() {
     attributes["supply"]++ //特產++
     attributes["money"] += attributes["station"] //驛站獲得$1
+    for (var i = 0; i <= 3; i++) {
+        players_attributes[`player_${i}`].supply++
+        players_attributes[`player_${i}`].money += players_attributes[`player_${i}`].station
+    }
     display_user_attributes(attributes)
+    display_all_user_attributes(players_attributes)
 }
 
 let color = ''
@@ -1124,7 +1129,7 @@ function doneMovement(current_player_id) {
     if (current_player_id == 3) {
         if (flag_lastround) { game_is_done = true }
         current_player_id = 0
-        attributes['supply']++
+        roundFinised()
         if (missionDone) { flag_lastround = true }
     } else {
         current_player_id++;
@@ -1229,3 +1234,7 @@ Echo.join(`room.${roomid}`)
     })
 
 let dd;
+//　離開頁面提醒
+$(window).bind('beforeunload', function () {
+    return 'Are you sure you want to leave?';
+});

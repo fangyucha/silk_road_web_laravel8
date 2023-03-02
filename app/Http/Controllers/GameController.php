@@ -99,7 +99,6 @@ class GameController extends Controller
                 'game_id' => $request->roomid
             ]);
         }
-        return;
-        //return response()->json($player);
+        return response()->json($player);
     }
 }
