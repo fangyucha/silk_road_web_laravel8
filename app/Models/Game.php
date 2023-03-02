@@ -18,9 +18,9 @@ class Game extends Model
         return $this->hasMany(Round::class);
     }
 
-    public function user_game()
+    public function users()
     {
-        return $this->hasMany(UserGame::class, 'game_id', 'id');
+         return $this->belongsToMany(User::class, 'user_game');
     }
 
     public function getArrUserId(){

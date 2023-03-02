@@ -10,19 +10,17 @@ class UserGame extends Model
 {
     use HasFactory;
     protected $table = 'user_game';
-    protected $fillable = [
-        'user_id',
-        'game_id',
-        'created_at',
-        'updated_at',
-        'status'
-    ];
-    public $timestamps = true;
+    // protected $fillable = [
+    //     'user_id',
+    //     'game_id',
+    //     'created_at',
+    //     'updated_at',
+    // ];
 
     public function memberNum($game_id)
     {
         return $this->where([
-            'game_id' => $room_id,
+            'game_id' => $game_id,
         ])->count();
     }
 

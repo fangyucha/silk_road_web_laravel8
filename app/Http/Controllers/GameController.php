@@ -46,13 +46,16 @@ class GameController extends Controller
             $roomid = $game->id;
         }else{
             $arrUserId = $game->getArrUserId();
-            $arrUserId[] = Auth::user()->id;
-            $game->users_id = $arrUserId;
-            $game->save();
-            $roomid = $game->id;
-            if($game->getUserIdNum() == 4){
-                broadcast(new RoomFull($roomid));
-            }
+            $thisUserId = Auth::user()->id;
+             if(in_array($thisUserId, $arrUserId)){ //已在房間內，則返回進入遊戲頁
+                    $request->session()->flash('error', 'You have already entered this game on another site.');
+                    return redirect()->back();
+                }else{ //未進入
+                    $arrUserId[] = Auth::user()->id;
+                    $game->users_id = $arrUserId;
+                    $game->save();
+                    $roomid = $game->id;
+                }
         }
         session(['character' => $game->getUserIdNum()]);
         echo session('character');
@@ -87,10 +90,16 @@ class GameController extends Controller
         $OldPlayer = $request->session()->has('player') ? $request->session()->get('player') : null;
         $player = new Player($OldPlayer, $request->character, $request->roomid);
         $player::doMovement($request->movementType, $request); // 執行動作
-        //broadcast(new DoMovement($request))->toOthers();
-        //event(new WalkUpdate($request));
         $request->session()->put('player', $player);
-        return response()->json($player);
-        //return response()->json($request->attributes);
+
+        // 儲存每回合資料
+        if(($request->character == 3) && ($request->movementType != 'walk')){
+            $round = \App\Models\Round::create([
+                'players_data' => $_POST["playersData"],
+                'game_id' => $request->roomid
+            ]);
+        }
+        return;
+        //return response()->json($player);
     }
 }

@@ -114,7 +114,7 @@ function walk() {
     player.addEventListener('dragend', dragEnd)
 }
 
-// 建造
+// 建造 (castle == station 誤用...)
 function build() {
     if (loc == "城鎮") {
         movement_complete_text = "建造驛站"
@@ -123,12 +123,12 @@ function build() {
         //temp_attributes["money"] -= 0 驛站不用錢
         temp_attributes["station"] += 1
 
-        let img = new Image()
-        img.src = "../img/station.png"
-        img.draggable = "false"
-        img.setAttribute("class", "building_img")
-        img.id = character // 紀錄建築物屬於誰
-        btn_loc.parentElement.appendChild(img) // 建造
+        // let img = new Image()
+        // img.src = "../img/station.png"
+        // img.draggable = "false"
+        // img.setAttribute("class", "building_img")
+        // img.id = character // 紀錄建築物屬於誰
+        // btn_loc.parentElement.appendChild(img) // 建造
     } else if (loc == "聖地") {
         movement_complete_text = "花費 $5 建造神廟"
         movementType = 'build_temple'
@@ -143,12 +143,12 @@ function build() {
             temp_attributes["temple"] -= 1
             return
         }
-        let img = new Image()
-        img.src = "../img/temple.png"
-        img.draggable = "false"
-        img.setAttribute("class", "building_img")
-        img.id = character // 紀錄建築物屬於誰
-        btn_loc.parentElement.appendChild(img) // 建造
+        // let img = new Image()
+        // img.src = "../img/temple.png"
+        // img.draggable = "false"
+        // img.setAttribute("class", "building_img")
+        // img.id = character // 紀錄建築物屬於誰
+        // btn_loc.parentElement.appendChild(img) // 建造
     } else { //其他地形
         movement_complete_text = "花費 $3 建造要塞"
         movementType = 'build_fort'
@@ -164,13 +164,13 @@ function build() {
             return
         }
 
-        let img = new Image()
-        img.src = "../img/fortress.png"
-        img.draggable = "false"
-        img.setAttribute("class", "building_img")
-        img.id = character // 紀錄建築物屬於誰
-        btn_loc.parentElement.appendChild(img) // 建造
-        //btn_loc.classList.add('builded') // 建造
+        // let img = new Image()
+        // img.src = "../img/fortress.png"
+        // img.draggable = "false"
+        // img.setAttribute("class", "building_img")
+        // img.id = character // 紀錄建築物屬於誰
+        // btn_loc.parentElement.appendChild(img) // 建造
+        // //btn_loc.classList.add('builded') // 建造
     }
 }
 
@@ -233,6 +233,9 @@ let unit_price = 0
 function sell() {
     let store_loc = btn_loc.children[0].innerText // 現在所在的大城市名稱 [君坦,撒馬,敦煌,長安]
     // 依照不同身分顯示特產名稱;在不同區域販賣的價錢 [constan, samar, dunhunang, changan]
+    if (!store_loc) {
+        store_loc = btn_loc.children[1].innerText
+    }
     switch (character) {
         case '0': //'constan'
             switch (store_loc) {
@@ -383,7 +386,7 @@ function display_trade_complete(trade) {
             } else if (trade_target.id == "close") {
                 panel_store.style.display = "none" //關閉商店
                 $('.store').off('click') // 商店的click事件註銷
-                doneMovement(current_player_id)
+                //doneMovement(current_player_id)
 
                 $.ajaxSetup({
                     headers: {
@@ -400,6 +403,8 @@ function display_trade_complete(trade) {
                         "character": character,
                         "roomid": roomid,
                         "attributes": JSON.stringify(attributes),
+                        "playersData": JSON.stringify(players_attributes),
+                        "sell": sell_benefit,
                     },
                     success: function (data) {
                         console.log(data)
@@ -441,7 +446,7 @@ function display_movement_complete() {
             pre_btn_loc.style.border = "";
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
-            doneMovement(current_player_id)
+            //doneMovement(current_player_id)
 
             $.ajaxSetup({
                 headers: {
@@ -456,6 +461,7 @@ function display_movement_complete() {
                     "character": character,
                     "roomid": roomid,
                     "btn_loc": btn_loc.id,
+                    "playersData": JSON.stringify(players_attributes),
                 },
                 success: function (data) {
                     console.log(data)
@@ -553,50 +559,96 @@ function display_user_attributes(attributes) {
     }
 }
 
-// TODO:所有玩家數值
+let missionSuccess = 0
+let missionDone = false
+let flag_lastround = false
+// 所有玩家數值
 function display_all_user_attributes(players_attributes) {
+    missionSuccess = 0
     all_users_attributes.innerHTML = ""
     // 拜占庭
-    $.each(players_attributes, function (key, value) {
-        all_users_attributes.innerHTML += `<tr>`
-        all_users_attributes.innerHTML += `<td> <span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>`
-        all_users_attributes.innerHTML += "<td>"
-        all_users_attributes.innerHTML += value.money
-        all_users_attributes.innerHTML += "</td>"
-        all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td>`
-        all_users_attributes.innerHTML += `</tr>`
-    })
-    all_users_attributes.innerHTML += `<tr>`
-    all_users_attributes.innerHTML += `<td> <span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>`
-    $.each((players_attributes['player_0']), function (key, value) {
-        all_users_attributes.innerHTML += "<td>"
-        all_users_attributes.innerHTML += value
-        all_users_attributes.innerHTML += "</td>"
-    })
-    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td>`
-    all_users_attributes.innerHTML += `</tr>`
+    display_a_user(0, players_attributes['player_0'])
     // 阿拉伯
-    all_users_attributes.innerHTML += `<tr>
-        <td> <span><i class="fa-solid fa-chess-rook"></i>阿拉伯帝國</span></td>`
-    $.each((players_attributes['player_1']), function (key, value) {
-        all_users_attributes.innerHTML += `<td>${value}</td>`
-    })
-    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
+    display_a_user(1, players_attributes['player_1'])
     // 笈多
-    all_users_attributes.innerHTML += `<tr>
-        <td> <span><i class="fa-solid fa-chess-rook"></i>笈多帝國</span></td>`
-    $.each((players_attributes['player_2']), function (key, value) {
-        all_users_attributes.innerHTML += `<td>${value}</td>`
-    })
-    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
-
+    display_a_user(2, players_attributes['player_2'])
     // 唐
-    all_users_attributes.innerHTML += `<tr>
-        <td> <span><i class="fa-solid fa-chess-rook"></i>唐帝國</span></td>`
-    $.each((players_attributes['player_3']), function (key, value) {
-        all_users_attributes.innerHTML += `<td>${value}</td>`
-    })
-    all_users_attributes.innerHTML += `<td><i class="fa-solid fa-circle-check d-none"></i></td></tr>`
+    display_a_user(3, players_attributes['player_3'])
+    if (missionSuccess >= 3) {
+        missionDone = true
+    }
+}
+function display_a_user(character, attributes) {
+    // TODO add character & mission
+    // Create a new table row
+    const newRow = document.createElement("tr");
+
+    // Create a new table cell for each attribute and append it to the row
+    const nameCell = document.createElement("td");
+    switch (character) {
+        case 0:
+            nameCell.innerHTML = `<span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>`;
+            break
+        case 1:
+            nameCell.innerHTML = `<span><i class="fa-solid fa-chess-rook"></i>阿拉伯帝國</span></td>`;
+            break
+        case 2:
+            nameCell.innerHTML = `<span><i class="fa-solid fa-chess-rook"></i>笈多王朝</span></td>`;
+            break
+        case 3:
+            nameCell.innerHTML = `<span><i class="fa-solid fa-chess-rook"></i>唐帝國</span></td>`;
+            break
+    }
+    newRow.appendChild(nameCell);
+
+    const moneyCell = document.createElement("td");
+    moneyCell.textContent = attributes.money;
+    newRow.appendChild(moneyCell);
+
+    const stationCell = document.createElement("td");
+    stationCell.textContent = attributes.station;
+    newRow.appendChild(stationCell);
+
+    const fortCell = document.createElement("td");
+    fortCell.textContent = attributes.fort;
+    newRow.appendChild(fortCell);
+
+    const templeCell = document.createElement("td");
+    templeCell.textContent = attributes.temple;
+    newRow.appendChild(templeCell);
+
+    const supplyCell = document.createElement("td");
+    supplyCell.textContent = attributes.supply;
+    newRow.appendChild(supplyCell);
+
+    const missionCell = document.createElement("td");
+    if (checkMission(character)) {
+        missionCell.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        missionSuccess++
+    } else {
+        missionCell.innerHTML = `<i class="fa-solid fa-circle-check d-none"></i>`;
+    }
+    newRow.appendChild(missionCell);
+
+    // Append the new row to the table
+    all_users_attributes.appendChild(newRow);
+}
+function checkMission(character) {
+    //TODO
+    switch (character) {
+        case 0:
+            if (players_attributes['player_0'].fort >= 5) { return true }
+            break
+        case 1:
+            if (players_attributes['player_1'].rob >= 5) { return true }
+            break
+        case 2:
+            if (players_attributes['player_2'].sell >= 30) { return true }
+            break
+        case 3:
+            if (players_attributes['player_3'].station >= 7) { return true }
+            break
+    }
 }
 
 /*drag and drop*/
@@ -810,10 +862,11 @@ window.onload = WinOnResize
 
 // 遊戲迴圈
 let players_attributes = {
-    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
-    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0 },
+    //sell:賣特產獲得的金錢量
+    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
+    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
+    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
+    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
 }
 let game_is_done = false // 遊戲結束
 
@@ -983,8 +1036,20 @@ function playerRound(player_id) {
         checkGameDone()
     } else {
         console.log('不是你的回合')
-        p = parseInt(current_player_id) + 1
-        timer_panel.innerText = `玩家 ${p} 的回合`
+        switch (current_player_id) {
+            case '0':
+                timer_panel.innerText = '拜占庭帝國的回合'
+                break
+            case '1':
+                timer_panel.innerText = '阿拉伯帝國的回合'
+                break
+            case '2':
+                timer_panel.innerText = '笈多王朝的回合'
+                break
+            case '3':
+                timer_panel.innerText = '唐帝國的回合'
+                break
+        }
     }
 }
 let p = 0 // 紀錄玩家回合
@@ -1003,11 +1068,28 @@ function round() { // TODO:每輪1000秒
 }
 
 function win() { // return winner
-    let money_arr = Array()
-    for (let i = 0; i++; i <= 3) {
-        money_arr.push(players_attributes[`player_${i} `])
+    let max_money = 0
+    let winner = ''
+    for (var i = 0; i <= 3; i++) {
+        if (players_attributes[`player_${i}`].money >= max_money) {
+            switch (i) {
+                case 0:
+                    winner += '拜占庭'
+                    break
+                case 1:
+                    winner += '阿拉伯'
+                    break
+                case 2:
+                    winner += '笈多'
+                    break
+                case 3:
+                    winner += '唐帝國'
+                    break
+            }
+            max_money = players_attributes[`player_${i}`].money
+        }
     }
-    let winner = Math.max(...money_arr)
+    //let max_money = Math.max(...money_arr)
     return winner
 }
 
@@ -1040,13 +1122,15 @@ function timer(flag) {
 
 function doneMovement(current_player_id) {
     if (current_player_id == 3) {
+        if (flag_lastround) { game_is_done = true }
         current_player_id = 0
         attributes['supply']++
+        if (missionDone) { flag_lastround = true }
     } else {
         current_player_id++;
     }
     display_user_attributes(attributes)
-    //display_all_user_attributes(players_attributes)
+    display_all_user_attributes(players_attributes)
     clearTimeout(`time_player${current_player_id} `);
     clearInterval(time_timer);
     time_timer = null;
@@ -1072,7 +1156,7 @@ Echo.join(`room.${roomid}`)
     .joining((user) => {
         //userInfo.push(user);
     })
-    .listen('.DoMovement', (e) => {
+    .listen('.Walk', (e) => {
         console.log(e)
         dd = e
         let lastBtn = e.steps.slice(-1)
@@ -1090,6 +1174,9 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+
+        //更新數值
+        players_attributes[`player_${e.character}`].fort += 1
         doneMovement(e.character)
     })
     .listen('.BuildTemple', (e) => {
@@ -1101,6 +1188,9 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+
+        //更新數值
+        players_attributes[`player_${e.character}`].temple += 1
         doneMovement(e.character)
     })
     .listen('.BuildCastle', (e) => {
@@ -1112,16 +1202,25 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+
+        //更新數值
+        players_attributes[`player_${e.character}`].station += 1
         doneMovement(e.character)
     })
     .listen('.Rob', (e) => {
         console.log(e)
         let place = document.querySelector(`#${e.btn_loc}`)
         place.parentElement.removeChild(place.parentElement.childNodes[place.parentElement.childNodes.length - 1])
+
+        //更新數值
+        players_attributes[`player_${e.character}`].rob += 1
         doneMovement(e.character)
     })
     .listen('.Trade', (e) => {
         console.log(e)
+        players_attributes[`player_${e.character}`].sell += parseInt(e.sell)
+        players_attributes[`player_${e.character}`].money = e.attributes.money
+        players_attributes[`player_${e.character}`].supply = e.attributes.supply
         doneMovement(e.character)
     })
     .listen('.Cancel', (e) => {

@@ -37,8 +37,8 @@ class User extends Authenticatable
         //'remember_token',
     ];
 
-    public function posts()
+    public function games()
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Post::class, "user_game");
     }
 }

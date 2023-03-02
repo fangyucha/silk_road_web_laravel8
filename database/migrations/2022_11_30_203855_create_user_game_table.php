@@ -15,9 +15,9 @@ class CreateUserGameTable extends Migration
     {
         Schema::create('user_game', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->unsigned()->nullable();
-            $table->integer('game_id')->unsigned()->nullable();
-            $table->timestamps();
+            $table->bigInteger('user_id')->unsigned()->unsigned();
+            $table->bigInteger('game_id')->unsigned()->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');$table->foreign('game_id')->references('id')->on('games')->onDelete('cascade');
         });
     }
 

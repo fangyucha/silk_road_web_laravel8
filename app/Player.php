@@ -2,7 +2,7 @@
 
 namespace App;
 
-use App\Events\DoMovement;
+use App\Events\Walk;
 use App\Events\BuildFort;
 use App\Events\BuildTemple;
 use App\Events\BuildCastle;
@@ -12,6 +12,7 @@ use App\Events\Cancel;
 
 class Player
 {
+    //TODO:getter and setter ...... private properites
     public $character; //遊戲角色代碼 0:拜占庭 1:阿拉伯 2:笈多 3:唐帝國
     public $roomid;
     public $coin = 10; //錢 初始10
@@ -63,7 +64,7 @@ class Player
     public function doMovement($movementType, $movementData){
         if ($movementType == 'walk'){
             //$this->walk($movementData->stepsCount, $movementData->otherCastle);//1
-            broadcast(new DoMovement($movementData))->toOthers(); // 回傳走過的地方
+            broadcast(new Walk($movementData))->toOthers(); // 回傳走過的地方
             //return $this->stepsCount;
         }elseif ($movementType == 'trade'){
             //$this->trade();//2
@@ -79,15 +80,15 @@ class Player
             broadcast(new Rob($movementData));
         }elseif($movementType == 'build_fort'){
             //$this->buildFort();//7
-            broadcast(new BuildFort($movementData))->toOthers();
+            broadcast(new BuildFort($movementData));
         }elseif($movementType == 'build_temple'){
             //$this->buildTemple();//8
-            broadcast(new BuildTemple($movementData))->toOthers();
+            broadcast(new BuildTemple($movementData));
         }elseif($movementType == 'build_castle'){
             //$this->buildCastle();//9
-            broadcast(new BuildCastle($movementData))->toOthers();
+            broadcast(new BuildCastle($movementData));
         }elseif($movementType == 'cancel'){
-            broadcast(new Cancel($movementData))->toOthers();
+            broadcast(new Cancel($movementData));
         }
     }
 

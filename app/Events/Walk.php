@@ -10,14 +10,13 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class Trade implements ShouldBroadcast
+class Walk implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $roomid;
+    public $data;
+    public $steps;
     public $character;
-    public $attributes;
-    public $sell;
 
     /**
      * Create a new event instance.
@@ -27,10 +26,9 @@ class Trade implements ShouldBroadcast
     public function __construct($data)
     {
         // walk
-        $this->roomid = $_POST["roomid"];
-        $this->character = $_POST["character"];
-        $this->attributes = json_decode($_POST["attributes"]);
-        $this->sell = $_POST["sell"];
+        $this->data = $data->roomid;
+        $this->steps = json_decode($data->steps);
+        $this->character = $data->character;
     }
 
     /**
@@ -40,10 +38,10 @@ class Trade implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PresenceChannel('room.'.$this->roomid);
+        return new PresenceChannel('room.'.$this->data);
     }
     public function broadcastAs()
     {
-        return 'Trade';
+        return 'Walk';
     }
 }

@@ -9,10 +9,10 @@
     <div id="mySidenav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <!--<a href='{{ route('post.intro_changan') }}' class=' btn btn-outline-secondary'>更多資訊</a>-->
-        <a href="#" onclick="">使用者</a>
-        <a href="#" onclick="openRule()">規則</a>
-        <a href="#" onclick="openHistory()">歷史</a>
-        <a href="#" onclick="openDevelopment()">關於</a>
+        <!--<a href="#" onclick="">使用者</a>-->
+        <a href="javascript:void(0)" onclick="openRule()">規則</a>
+        <a href="javascript:void(0)" onclick="openHistory()">歷史</a>
+        <a href="javascript:void(0)" onclick="openDevelopment()">關於</a>
     </div>
     <span class='nav' onclick="openNav()">&#9776; 選單</span>
 
@@ -4687,7 +4687,7 @@
         <p class="m-0">點選角色 拖曳來移動</p>
     </div>
 
-    <!--timer TODO -->
+    <!--timer-->
     <div class="timer">0</div>
 
     <!--GM交易商店-->
