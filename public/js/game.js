@@ -125,12 +125,6 @@ function build() {
         //temp_attributes["money"] -= 0 驛站不用錢
         temp_attributes["station"] += 1
 
-        // let img = new Image()
-        // img.src = "../img/station.png"
-        // img.draggable = "false"
-        // img.setAttribute("class", "building_img")
-        // img.id = character // 紀錄建築物屬於誰
-        // btn_loc.parentElement.appendChild(img) // 建造
     } else if (loc == "聖地") {
         movement_complete_text = "花費 $5 建造神廟"
         movementType = 'build_temple'
@@ -145,12 +139,7 @@ function build() {
             temp_attributes["temple"] -= 1
             return
         }
-        // let img = new Image()
-        // img.src = "../img/temple.png"
-        // img.draggable = "false"
-        // img.setAttribute("class", "building_img")
-        // img.id = character // 紀錄建築物屬於誰
-        // btn_loc.parentElement.appendChild(img) // 建造
+
     } else { //其他地形
         movement_complete_text = "花費 $3 建造要塞"
         movementType = 'build_fort'
@@ -166,13 +155,6 @@ function build() {
             return
         }
 
-        // let img = new Image()
-        // img.src = "../img/fortress.png"
-        // img.draggable = "false"
-        // img.setAttribute("class", "building_img")
-        // img.id = character // 紀錄建築物屬於誰
-        // btn_loc.parentElement.appendChild(img) // 建造
-        // //btn_loc.classList.add('builded') // 建造
     }
 }
 
@@ -188,7 +170,7 @@ function rob() {
         temp_attributes["money"] += 3
         return
     }
-    //e.nextElementSibling.remove() // 拆除
+
 }
 // 判斷有沒有他人的建築
 function has_others_building(e, my_character) {
@@ -448,7 +430,6 @@ function display_movement_complete() {
             pre_btn_loc.style.border = "";
             attributes = Object.assign({}, temp_attributes) // 把暫存的玩家數值變成真的
             display_user_attributes(attributes)
-            //doneMovement(current_player_id)
 
             $.ajaxSetup({
                 headers: {
@@ -476,8 +457,7 @@ function display_movement_complete() {
         } else { /* 取消 */
             panel_movement_complete.style.display = "none"
             panel_movement.style.display = "block" // 再選一次動作
-            // 移除建造的標籤 TODO:應該要換個地方驗證
-            //btn_loc.classList.remove('builded')
+            // 移除建造
             btn_loc.parentElement.removeChild(btn_loc.parentElement.childNodes[btn_loc.parentElement.childNodes.length - 1])
         }
         $('.movement_complete button').off('click') //click事件註銷
@@ -534,10 +514,8 @@ function display_walk_complete(ev) {
             })
 
             steps.forEach(e => { e.classList.add('walked') })
-            //doneMovement(current_player_id) 走路後還可以做動作
 
         } else { /* 取消 */
-            // TODO 檢查哪裡讓event on 兩次
             steps.forEach(e => { e.classList.remove('round_walk') })
             document.getElementById(steps_id.slice(-1)).removeChild(document.getElementById(drag_player))
             player = drag_player_clone
@@ -581,7 +559,6 @@ function display_all_user_attributes(players_attributes) {
     }
 }
 function display_a_user(character, attributes) {
-    // TODO add character & mission
     // Create a new table row
     const newRow = document.createElement("tr");
 
@@ -636,7 +613,6 @@ function display_a_user(character, attributes) {
     all_users_attributes.appendChild(newRow);
 }
 function checkMission(character) {
-    //TODO
     switch (character) {
         case 0:
             if (players_attributes['player_0'].fort >= 5) { return true }
@@ -682,7 +658,7 @@ function dragStart(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
     // 初始化
     [preX, preY] = setPrePosition(ev.clientX, ev.clientY, times)
-    //console.log([preX, preY])
+    ///console.log([preX, preY])
     drag_start = ev.target.parentElement
     is_drop = false
     step.innerHTML = step_num
@@ -707,9 +683,6 @@ function dragStart(ev) {
     }
 
     // remove listener
-    // 當格不能走
-    // ev.target.parentElement.removeEventListener('dragover', cancelDefault)
-    // ev.target.parentElement.removeEventListener('dragenter', drageEnter)
     // 所有玩家在的格子不能走
     drop_players.forEach(player => {
         player.parentElement.removeEventListener('dragover', cancelDefault)
@@ -827,13 +800,7 @@ function distance(x1, y1, x2, y2) {
 
 function stepIsRunOut(spent_step, target) {
     if (step.innerHTML - spent_step < 0) {
-        /*
-        drop_container.forEach(container => { // 所有格子
-            container.removeEventListener('drop', dropped)
-            container.removeEventListener('dragenter', drageEnter)
-            container.removeEventListener('dragover', cancelDefault)
-        })
-        */
+
         target.removeEventListener('dragenter', drageEnter)
         target.removeEventListener('dragover', cancelDefault)
         target.addEventListener('dragleave', dragLeave)
@@ -960,9 +927,6 @@ function doMovement() {
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
-    } else {
-        // 水域
-        panel_movement.style.display = "none" // TODO:之後是判斷所在位置之後，這個應該要刪除
     }
 }
 
@@ -1010,9 +974,6 @@ function doMovementAfterWalk() {
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
-    } else {
-        // 水域
-        panel_movement.style.display = "none" // TODO:之後是判斷所在位置之後，這個應該要刪除
     }
     card_cancel.style.display = ""
     card_walk.style.display = "none"
