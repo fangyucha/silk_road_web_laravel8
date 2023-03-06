@@ -73,6 +73,9 @@ display_user_attributes(attributes) //刷新玩家數值 TODO:僅供demo用，�
 let temp_attributes = Object.assign({}, attributes) // 暫存玩家數值，供undo movement
 let movementType = "" // 紀錄動作類別
 let building = "" // 紀錄建築
+let timer_panel = document.querySelector(".timer");
+let time_timer = null
+let time_used = 0
 
 /* movement listener */
 $('.card').on('click', function (event) {
@@ -99,7 +102,6 @@ $('.card').on('click', function (event) {
         display_store()
     } else if (target.classList.contains("cancel")) {
         // 取消
-        // TODO 取消
         movement_complete_text = "結束回合"
         movementType = "cancel"
         display_movement_complete()
@@ -561,7 +563,7 @@ function display_user_attributes(attributes) {
 
 let missionSuccess = 0
 let missionDone = false
-let flag_lastround = false
+let flag_lastTWOround = 0 //如果==2則遊戲結束
 // 所有玩家數值
 function display_all_user_attributes(players_attributes) {
     missionSuccess = 0
@@ -649,6 +651,7 @@ function checkMission(character) {
             if (players_attributes['player_3'].station >= 7) { return true }
             break
     }
+    return false
 }
 
 /*drag and drop*/
@@ -679,7 +682,7 @@ function dragStart(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
     // 初始化
     [preX, preY] = setPrePosition(ev.clientX, ev.clientY, times)
-    console.log([preX, preY])
+    //console.log([preX, preY])
     drag_start = ev.target.parentElement
     is_drop = false
     step.innerHTML = step_num
@@ -755,7 +758,7 @@ function drageEnter(ev) {
     cancelDefault(ev)
     let target = ev.target
     let [currentX, currentY] = setPrePosition(ev.clientX, ev.clientY, times)
-    console.log([currentX, currentY])
+    //console.log([currentX, currentY])
     // 限制移動周圍格子
     if (distance(preX, preY, currentX, currentY, times) < 58) {
         // 是周圍格子，可以走
@@ -870,11 +873,8 @@ let players_attributes = {
 }
 let game_is_done = false // 遊戲結束
 
-function stratGame() {
-    if (game_is_done) {
-        return
-    }
-    round()
+function startGame() {
+    playerRound('player_0')
 }
 
 /* 檢查金錢為正 */
@@ -1028,19 +1028,11 @@ function playerRound(player_id) {
     }
     current_player_id = player_id.split('_')[1]
 
-    // TODO: 玩家回合
-    // player = document.querySelector(`#${player_id}`)
-    // console.log(player_id)
-    // doMovement()
-    // checkGameDone()
     if (character == current_player_id) {
         player = document.querySelector(`#${player_id}`)
-        console.log(player_id)
         timer()
         doMovement()
-        checkGameDone()
     } else {
-        console.log('不是你的回合')
         switch (current_player_id) {
             case '0':
                 timer_panel.innerText = '拜占庭帝國的回合'
@@ -1059,57 +1051,56 @@ function playerRound(player_id) {
 }
 let p = 0 // 紀錄玩家回合
 
-// TODO: delete
-let time_player1 = setTimeout(function () { playerRound('player_0') }, 0)
-let time_player2 = setTimeout(function () { playerRound('player_1') }, 1000000)
-let time_player3 = setTimeout(function () { playerRound('player_2') }, 2000000)
-let time_player4 = setTimeout(function () { playerRound('player_3') }, 3000000)
-
-function round() { // TODO:每輪1000秒
-    time_player1
-    time_player2
-    time_player3
-    time_player4
-}
-
 function win() { // return winner
-    let max_money = 0
+    let max_score = 0
     let winner = ''
     for (var i = 0; i <= 3; i++) {
-        if (players_attributes[`player_${i}`].money >= max_money) {
+        // 計算分數
+        // 金錢+建物*2+(任務+5)
+        let score = players_attributes[`player_${i}`].money + 2 * (players_attributes[`player_${i}`].fort + players_attributes[`player_${i}`].station + players_attributes[`player_${i}`].temple)
+        if (checkMission(i)) {
+            score += 5
+        }
+
+        if (score > max_score) {
             switch (i) {
                 case 0:
-                    winner += '拜占庭'
+                    winner = '拜占庭'
                     break
                 case 1:
-                    winner += '阿拉伯'
+                    winner = '阿拉伯'
                     break
                 case 2:
-                    winner += '笈多'
+                    winner = '笈多'
                     break
                 case 3:
-                    winner += '唐帝國'
+                    winner = '唐帝國'
                     break
             }
-            max_money = players_attributes[`player_${i}`].money
+            max_score = score
+        } else if (score == max_score) {
+            switch (i) {
+                case 0:
+                    winner += '和拜占庭'
+                    break
+                case 1:
+                    winner += '和阿拉伯'
+                    break
+                case 2:
+                    winner += '和笈多'
+                    break
+                case 3:
+                    winner += '和唐帝國'
+                    break
+            }
         }
     }
+
     //let max_money = Math.max(...money_arr)
     return winner
 }
 
-function checkGameDone() { //TODO:四個遊戲結束任務
-    if (players_attributes['player_0']["money"] == 101) {
-        game_is_done = true
-    }
-}
-
-stratGame()
-setInterval(function () { round() }, 4000000) //TODO:4000秒一輪
-
-let timer_panel = document.querySelector(".timer");
-let time_timer = null
-let time_used = 0
+startGame()
 
 function timer(flag) {
     //   按下 start 後 id 為 timer 的 DIV 內容可以開始倒數到到 0。
@@ -1127,10 +1118,10 @@ function timer(flag) {
 
 function doneMovement(current_player_id) {
     if (current_player_id == 3) {
-        if (flag_lastround) { game_is_done = true }
+        if (flag_lastTWOround == 2) { game_is_done = true }
         current_player_id = 0
         roundFinised()
-        if (missionDone) { flag_lastround = true }
+        if (missionDone) { flag_lastTWOround++ }
     } else {
         current_player_id++;
     }
@@ -1162,8 +1153,7 @@ Echo.join(`room.${roomid}`)
         //userInfo.push(user);
     })
     .listen('.Walk', (e) => {
-        console.log(e)
-        dd = e
+        //console.log(e)
         let lastBtn = e.steps.slice(-1)
         e.steps.forEach(e => { document.querySelector(`#${e}`).classList.add('walked') })
         e.character
@@ -1171,7 +1161,7 @@ Echo.join(`room.${roomid}`)
         //doneMovement(e.character) 不會進入下一位
     })
     .listen('.BuildFort', (e) => {
-        console.log(e)
+        //console.log(e)
 
         let img = new Image()
         img.src = "../img/fortress.png"
@@ -1182,10 +1172,11 @@ Echo.join(`room.${roomid}`)
 
         //更新數值
         players_attributes[`player_${e.character}`].fort += 1
+        players_attributes[`player_${e.character}`].money -= 3
         doneMovement(e.character)
     })
     .listen('.BuildTemple', (e) => {
-        console.log(e)
+        //console.log(e)
 
         let img = new Image()
         img.src = "../img/temple.png"
@@ -1196,10 +1187,11 @@ Echo.join(`room.${roomid}`)
 
         //更新數值
         players_attributes[`player_${e.character}`].temple += 1
+        players_attributes[`player_${e.character}`].money -= 5
         doneMovement(e.character)
     })
-    .listen('.BuildCastle', (e) => {
-        console.log(e)
+    .listen('.BuildCastle', (e) => { //station 驛站
+        //console.log(e)
 
         let img = new Image()
         img.src = "../img/station.png"
@@ -1213,23 +1205,43 @@ Echo.join(`room.${roomid}`)
         doneMovement(e.character)
     })
     .listen('.Rob', (e) => {
-        console.log(e)
-        let place = document.querySelector(`#${e.btn_loc}`)
-        place.parentElement.removeChild(place.parentElement.childNodes[place.parentElement.childNodes.length - 1])
+        //console.log(e)
+        let place = document.querySelector(`#${e.btn_loc}`) //搶的地點
+        let be_robbed_id = place.parentElement.childNodes[place.parentElement.childNodes.length - 1].id //被搶的人
+        let robBuilding = place.parentElement.childNodes[place.parentElement.childNodes.length - 1] //被搶的建築
+
+        place.parentElement.removeChild(robBuilding)
 
         //更新數值
         players_attributes[`player_${e.character}`].rob += 1
+        players_attributes[`player_${e.character}`].money -= 3
+        if (robBuilding.src.indexOf('fort') > -1) {
+            players_attributes[`player_${be_robbed_id}`].fort -= 1
+            if (be_robbed_id == character) { //自己被搶
+                attributes.fort -= 1
+            }
+        } else if (robBuilding.src.indexOf('station') > -1) {
+            players_attributes[`player_${be_robbed_id}`].station -= 1
+            if (be_robbed_id == character) {
+                attributes.station -= 1
+            }
+        } else if (robBuilding.src.indexOf('temple') > -1) {
+            players_attributes[`player_${be_robbed_id}`].temple -= 1
+            if (be_robbed_id == character) {
+                attributes.temple -= 1
+            }
+        }
         doneMovement(e.character)
     })
     .listen('.Trade', (e) => {
-        console.log(e)
+        //console.log(e)
         players_attributes[`player_${e.character}`].sell += parseInt(e.sell)
         players_attributes[`player_${e.character}`].money = e.attributes.money
         players_attributes[`player_${e.character}`].supply = e.attributes.supply
         doneMovement(e.character)
     })
     .listen('.Cancel', (e) => {
-        console.log(e)
+        //console.log(e)
         doneMovement(e.character)
     })
 

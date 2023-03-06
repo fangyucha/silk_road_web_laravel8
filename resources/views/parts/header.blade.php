@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg" style="background-color: #cfb53b;">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{{ route('post.enteringGame') }}">金色絲路</a>
+        <a class="navbar-brand" href="{{ route('post.enteringGame') }}">絲路––華戎道</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

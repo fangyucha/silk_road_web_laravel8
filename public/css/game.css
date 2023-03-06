@@ -117,6 +117,17 @@ table {
     height: 200px;
 }
 
+/*任務內容*/
+.mission {
+    position: absolute;
+    top: 680px;
+    left: 1590px;
+}
+
+.mission p{
+    font-size: 18px;
+}
+
 /*左側滑出選單欄*/
 
 .nav {

@@ -82,41 +82,51 @@
             <tbody id="users-data">
                 <tr>
                     <td><span><i class="fa-solid fa-chess-rook"></i>拜占庭帝國</span></td>
+                    <td>10</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
-                    <td>1</td>
                     <td><i class="fa-solid fa-circle-check d-none"></i></td>
                 </tr>
                 <tr>
                     <td><span><i class="fa-solid fa-chess-rook"></i>阿拉伯帝國</span></td>
+                    <td>10</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
-                    <td>1</td>
                     <td><i class="fa-solid fa-circle-check d-none"></i></td>
                 </tr>
                 <tr>
                     <td><span><i class="fa-solid fa-chess-rook"></i>笈多王朝</span></td>
+                    <td>10</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
-                    <td>1</td>
                     <td><i class="fa-solid fa-circle-check d-none"></i></td>
                 </tr>
                 <tr>
                     <td><span><i class="fa-solid fa-chess-rook"></i>唐帝國</span></td>
+                    <td>10</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
                     <td>0</td>
-                    <td>1</td>
                     <td><i class="fa-solid fa-circle-check d-none"></i></td>
                 </tr>
             </tbody>
+        </table>
+    </div>
+
+    <!--任務內容-->
+    <div class="mission">
+        <table>
+        <p>拜占庭帝國：建造5座要塞</p>
+        <p>阿拉伯帝國：掠奪5次</p>
+        <p>笈多王朝：販賣特產獲得超過30塊</p>
+        <p>唐帝國：建立7座驛站</p>
         </table>
     </div>
 
