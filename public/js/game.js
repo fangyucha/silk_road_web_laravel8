@@ -122,7 +122,7 @@ function build() {
         movement_complete_text = "建造驛站"
         movementType = 'build_castle'
         building = 'castle'
-        //temp_attributes["money"] -= 0 驛站不用錢
+        temp_attributes["money"] -= 1
         temp_attributes["station"] += 1
 
     } else if (loc == "聖地") {
@@ -172,10 +172,31 @@ function rob() {
     }
 
 }
+
+// 判斷有沒有建築
+function has_building(location) {
+    let building = location.nextElementSibling
+    if (building) { // 有建築
+        return true
+    }
+    return false
+}
 // 判斷有沒有他人的建築
-function has_others_building(e, my_character) {
-    let others_building = e.nextElementSibling
-    if (others_building && others_building.id != my_character) { // 有其他玩家的建築
+function has_others_building(location, my_character) {
+    let building = location.nextElementSibling
+    if (building && building.id != my_character) { // 有其他玩家的驛站
+        return true
+    }
+    return false
+}
+// 判斷有沒有他人的驛站
+function has_others_station(location, my_character) {
+    let building = location.nextElementSibling
+    let is_station = false
+    if (building) {
+        is_station = building.src.indexOf('station') > -1 // bool
+    }
+    if (is_station && building.id != my_character) { // 有其他玩家的驛站
         return true
     }
     return false
@@ -403,6 +424,8 @@ function display_trade_complete(trade) {
             display_slider() // 更新slider數值
 
         } else { /* 取消 */
+            temp_attributes['money'] = attributes['money']
+            temp_attributes['supply'] = attributes['supply']
             panel_movement_complete.style.display = "none"
         }
         $('.movement_complete button').off('click')
@@ -458,14 +481,14 @@ function display_movement_complete() {
             panel_movement_complete.style.display = "none"
             panel_movement.style.display = "block" // 再選一次動作
             // 移除建造
-            btn_loc.parentElement.removeChild(btn_loc.parentElement.childNodes[btn_loc.parentElement.childNodes.length - 1])
+            // btn_loc.parentElement.removeChild(btn_loc.parentElement.childNodes[btn_loc.parentElement.childNodes.length - 1])
         }
         $('.movement_complete button').off('click') //click事件註銷
 
     })
 }
 
-let otherCastle = 0 //計算是否有其他人的城堡
+let otherStation = 0 //計算是否有其他人的驛站
 let playerInfo = {}
 let steps_id = new Array();
 let steps_id_json;
@@ -480,9 +503,9 @@ function display_walk_complete(ev) {
         steps.forEach(e => { steps_id.push(e.id) })
         /* 確認 */
         if (target.id == "do_movement") {
-            ohterCastle = 0 // reset otherCastle
+            otherStation = 0 // reset otherStation
             steps.forEach(e => { e.classList.remove('round_walk') })
-            steps.forEach(e => { e.nextElementSibling ? otherCastle++ : null })
+            steps.forEach(e => { has_others_station(e, character) ? otherStation++ : null })
             steps_id_json = JSON.stringify(steps_id)
 
             $.ajaxSetup({
@@ -499,7 +522,7 @@ function display_walk_complete(ev) {
                     "character": character,
                     "roomid": roomid,
                     "stepsCount": steps.length,
-                    "otherCastle": otherCastle,
+                    "otherStation": otherStation,
                     "steps": steps_id_json, // event pusher
                 },
                 success: function (data) {
@@ -621,10 +644,10 @@ function checkMission(character) {
             if (players_attributes['player_1'].rob >= 5) { return true }
             break
         case 2:
-            if (players_attributes['player_2'].sell >= 30) { return true }
+            if (players_attributes['player_2'].sell >= 45) { return true }
             break
         case 3:
-            if (players_attributes['player_3'].station >= 7) { return true }
+            if (players_attributes['player_3'].station >= 12) { return true }
             break
     }
     return false
@@ -855,11 +878,14 @@ function checkMoney(money) {
 function roundFinised() {
     attributes["supply"]++ //特產++
     attributes["money"] += attributes["station"] //驛站獲得$1
+    attributes["money"] += attributes["temple"] * 2
     for (var i = 0; i <= 3; i++) {
         players_attributes[`player_${i}`].supply++
         players_attributes[`player_${i}`].money += players_attributes[`player_${i}`].station
+        players_attributes[`player_${i}`].money += players_attributes[`player_${i}`].temple * 2
     }
     display_user_attributes(attributes)
+    display_slider()
     display_all_user_attributes(players_attributes)
 }
 
@@ -867,16 +893,16 @@ let color = ''
 function colorDe() {
     switch (character) {
         case '0': //'constan'
-            color = '#930093'
+            color = '#f09cf0'
             break
         case '1':
             color = '#F9F900'
             break
         case '2':
-            color = '#C7C7E2'
+            color = '#9aacfa'
             break
         case '3':
-            color = '#FF7575'
+            color = '#ff6767'
             break
 
     }
@@ -888,45 +914,49 @@ function doMovement() {
     pre_btn_loc = btn_loc
     btn_loc = player.parentElement // 紀錄位置
     btn_loc.style.border = `thick solid ${color}`;
+    // 初始化
+    card_walk.style.display = "none"
+    card_building.style.display = "none"
+    card_trade.style.display = "none"
+    card_rob.style.display = "none"
 
     // 四個動作card顯示
     if (btn_loc.classList[0].indexOf('_t') > -1) {
-        // 城鎮
+        // 城鎮:行走、建造
         loc = "城鎮"
         card_walk.style.display = ""
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
-        building_content.textContent = "城鎮：免費建造驛站"
+        building_content.textContent = "城鎮：花 $1 建造驛站"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
     } else if (btn_loc.classList[0].indexOf('_h') > -1) {
-        // 聖地
+        // 聖地:行走、建造
         loc = "聖地"
         card_walk.style.display = ""
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
         building_content.textContent = "聖地：花 $5 建造神廟"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
     } else if (btn_loc.classList[0].indexOf("_c") > -1) {
-        // 大城市
+        // 大城市:行走、交易
         loc = "大城市"
         card_walk.style.display = ""
         card_trade.style.display = ""
-        card_building.style.display = "none" // 不能蓋建築
-        card_rob.style.display = "none" // 不能掠奪(沒有建築)
+
     } else if (btn_loc.classList[0].indexOf("_o") < 0) {
-        // 其他
+        // 其他:行走、建造
         loc = "其他"
         card_walk.style.display = ""
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
         building_content.textContent = "花 $3 建造要塞"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
+    }
+    if (has_building(btn_loc)) {
+        card_building.style.display = "none" // 有建築不能建造
     }
 }
 
@@ -935,6 +965,11 @@ function doMovementAfterWalk() {
     pre_btn_loc = btn_loc
     btn_loc = player.parentElement // 紀錄位置
     btn_loc.style.border = `thick solid ${color}`;
+    // 初始化
+    card_walk.style.display = "none"
+    card_building.style.display = "none"
+    card_trade.style.display = "none"
+    card_rob.style.display = "none"
 
     // 四個動作card顯示
     if (btn_loc.classList[0].indexOf('_t') > -1) {
@@ -942,8 +977,7 @@ function doMovementAfterWalk() {
         loc = "城鎮"
 
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
-        building_content.textContent = "城鎮：免費建造驛站"
+        building_content.textContent = "城鎮：花 $1 建造驛站"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
@@ -952,7 +986,6 @@ function doMovementAfterWalk() {
         loc = "聖地"
 
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
         building_content.textContent = "聖地：花 $5 建造神廟"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
@@ -962,21 +995,20 @@ function doMovementAfterWalk() {
         loc = "大城市"
 
         card_trade.style.display = ""
-        card_building.style.display = "none" // 不能蓋建築
-        card_rob.style.display = "none" // 不能掠奪(沒有建築)
     } else if (btn_loc.classList[0].indexOf("_o") < 0) {
         // 其他
         loc = "其他"
 
         card_building.style.display = ""
-        card_trade.style.display = "none" // 不能交易
         building_content.textContent = "花 $3 建造要塞"
         if (has_others_building(btn_loc, character)) {
             card_rob.style.display = ""
         }
     }
-    card_cancel.style.display = ""
-    card_walk.style.display = "none"
+    //card_cancel.style.display = ""
+    if (has_building(btn_loc)) {
+        card_building.style.display = "none" // 有建築不能建造
+    }
 }
 
 let current_player_id = 0 //當前玩家
@@ -1114,11 +1146,12 @@ Echo.join(`room.${roomid}`)
         //userInfo.push(user);
     })
     .listen('.Walk', (e) => {
-        //console.log(e)
+        console.log(e)
         let lastBtn = e.steps.slice(-1)
         e.steps.forEach(e => { document.querySelector(`#${e}`).classList.add('walked') })
         e.character
         document.querySelector(`#${lastBtn}`).appendChild(document.getElementById(`player_${e.character}`))
+
         //doneMovement(e.character) 不會進入下一位
     })
     .listen('.BuildFort', (e) => {
@@ -1130,7 +1163,9 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
-
+        if (e.character == character) { //自己的建築加上外框提示
+            btn_loc.nextElementSibling.style.border = `thick solid ${color}`
+        }
         //更新數值
         players_attributes[`player_${e.character}`].fort += 1
         players_attributes[`player_${e.character}`].money -= 3
@@ -1145,6 +1180,9 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+        if (e.character == character) { //自己的建築加上外框提示
+            btn_loc.nextElementSibling.style.border = `thick solid ${color}`
+        }
 
         //更新數值
         players_attributes[`player_${e.character}`].temple += 1
@@ -1160,9 +1198,13 @@ Echo.join(`room.${roomid}`)
         img.setAttribute("class", "building_img")
         img.id = e.character // 紀錄建築物屬於誰
         document.querySelector(`#${e.btn_loc}`).parentElement.appendChild(img)
+        if (e.character == character) { //自己的建築加上外框提示
+            btn_loc.nextElementSibling.style.border = `thick solid ${color}`
+        }
 
         //更新數值
         players_attributes[`player_${e.character}`].station += 1
+        players_attributes[`player_${e.character}`].money -= 1
         doneMovement(e.character)
     })
     .listen('.Rob', (e) => {

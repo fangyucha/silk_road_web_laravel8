@@ -120,12 +120,21 @@ table {
 /*任務內容*/
 .mission {
     position: absolute;
-    top: 680px;
-    left: 1590px;
+    top: 700px;
+    left: 1630px;
 }
 
 .mission p{
     font-size: 18px;
+}
+
+.mission img{
+    position: absolute;
+    top: -45px;
+    left: -50px;
+    z-index: -1;
+    width: 370px;
+    height: 250px;
 }
 
 /*左側滑出選單欄*/

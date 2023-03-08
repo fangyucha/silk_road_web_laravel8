@@ -17,6 +17,7 @@ class Walk implements ShouldBroadcast
     public $data;
     public $steps;
     public $character;
+    public $otherStation;
 
     /**
      * Create a new event instance.
@@ -29,6 +30,8 @@ class Walk implements ShouldBroadcast
         $this->data = $data->roomid;
         $this->steps = json_decode($data->steps);
         $this->character = $data->character;
+        $this->otherStation = $data->otherStation;
+
     }
 
     /**
