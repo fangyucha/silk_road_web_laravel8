@@ -37,6 +37,7 @@ class CreateRoundsTable extends Migration
             // $table->string('player3_build');
             // $table->string('player4_build');
             $table->text('players_data')->nullable();
+            $table->text('players_step')->nullable();
             $table->bigInteger('game_id');
         });
     }

@@ -18,6 +18,7 @@ class Trade implements ShouldBroadcast
     public $character;
     public $attributes;
     public $sell;
+    public $time;
 
     /**
      * Create a new event instance.
@@ -31,6 +32,7 @@ class Trade implements ShouldBroadcast
         $this->character = $_POST["character"];
         $this->attributes = json_decode($_POST["attributes"]);
         $this->sell = $_POST["sell"];
+        $this->time = $data->time;
     }
 
     /**

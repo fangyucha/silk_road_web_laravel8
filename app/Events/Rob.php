@@ -17,6 +17,7 @@ class Rob implements ShouldBroadcast
     public $roomid;
     public $character;
     public $btn_loc;
+    public $time;
 
     /**
      * Create a new event instance.
@@ -29,6 +30,7 @@ class Rob implements ShouldBroadcast
         $this->roomid = $data->roomid;
         $this->character = $data->character;
         $this->btn_loc = $data->btn_loc;
+        $this->time = $data->time;
     }
 
     /**

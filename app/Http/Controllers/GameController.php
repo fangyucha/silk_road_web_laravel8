@@ -62,6 +62,8 @@ class GameController extends Controller
         return redirect() -> route("game.waiting",['roomid' => $roomid]);
     }
 
+    public function 
+
     public function createNewGame(Request $request){
         $game = \App\Models\Game::create([
             'users_id' => [Auth::user()->id],
@@ -77,11 +79,15 @@ class GameController extends Controller
         return view('game.game');
     }
 
-    // 儲存遊戲回合資料
-    public function storeRound($player1, $player2, $player3, $player4, $game_id){
-        $round = new Round($player1, $player2, $player3, $player4, $game_id);
-
-        $round->save();
+    // 儲存遊戲回合資料(發放完每回合資源後)
+    public function storeRound(Request $request){
+        if(($request->character == 3) && ($request->movementType != 'walk')){
+            $round = \App\Models\Round::create([
+                'players_data' => $_POST["playersData"],
+                'players_step' => $_POST["playersStep"],
+                'game_id' => $request->roomid
+            ]);
+        }
         return;
     }
 
@@ -92,13 +98,13 @@ class GameController extends Controller
         $player::doMovement($request->movementType, $request); // 執行動作
         $request->session()->put('player', $player);
 
-        // 儲存每回合資料
-        if(($request->character == 3) && ($request->movementType != 'walk')){
-            $round = \App\Models\Round::create([
-                'players_data' => $_POST["playersData"],
-                'game_id' => $request->roomid
-            ]);
-        }
+        // // 儲存每回合資料
+        // if(($request->character == 3) && ($request->movementType != 'walk')){
+        //     $round = \App\Models\Round::create([
+        //         'players_data' => $_POST["playersData"],
+        //         'game_id' => $request->roomid
+        //     ]);
+        // }
         return response()->json($player);
     }
 }

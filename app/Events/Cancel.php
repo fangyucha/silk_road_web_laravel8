@@ -16,6 +16,7 @@ class Cancel implements ShouldBroadcast
 
     public $roomid;
     public $character;
+    public $time;
 
     /**
      * Create a new event instance.
@@ -27,6 +28,7 @@ class Cancel implements ShouldBroadcast
         // walk
         $this->roomid = $data->roomid;
         $this->character = $data->character;
+        $this->time = $data->time;
 
     }
 

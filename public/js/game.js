@@ -70,6 +70,19 @@ let attributes = { // 該玩家數值
     money: 10, station: 0, fort: 0, temple: 0, supply: 0
 }
 display_user_attributes(attributes) //刷新玩家數值 TODO:僅供demo用，之後要刪除，確認預設值之後可以設在html(減少刷新)
+let players_attributes = {
+    //sell:賣特產獲得的金錢量
+    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+}
+let players_step = {
+    "player_0": [],
+    "player_1": [],
+    "player_2": [],
+    "player_3": [],
+}
 let temp_attributes = Object.assign({}, attributes) // 暫存玩家數值，供undo movement
 let movementType = "" // 紀錄動作類別
 let building = "" // 紀錄建築
@@ -410,6 +423,7 @@ function display_trade_complete(trade) {
                         "attributes": JSON.stringify(attributes),
                         "playersData": JSON.stringify(players_attributes),
                         "sell": sell_benefit,
+                        "time": time_used,
                     },
                     success: function (data) {
                         console.log(data)
@@ -467,6 +481,7 @@ function display_movement_complete() {
                     "character": character,
                     "roomid": roomid,
                     "btn_loc": btn_loc.id,
+                    "time": time_used,
                     "playersData": JSON.stringify(players_attributes),
                 },
                 success: function (data) {
@@ -506,6 +521,7 @@ function display_walk_complete(ev) {
             otherStation = 0 // reset otherStation
             steps.forEach(e => { e.classList.remove('round_walk') })
             steps.forEach(e => { has_others_station(e, character) ? otherStation++ : null })
+            players_step[`player_${character}`] = steps_id
             steps_id_json = JSON.stringify(steps_id)
 
             $.ajaxSetup({
@@ -854,13 +870,6 @@ window.onload = WinOnResize
 
 
 // 遊戲迴圈
-let players_attributes = {
-    //sell:賣特產獲得的金錢量
-    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
-    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
-    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
-    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0 },
-}
 let game_is_done = false // 遊戲結束
 
 function startGame() {
@@ -887,6 +896,32 @@ function roundFinised() {
     display_user_attributes(attributes)
     display_slider()
     display_all_user_attributes(players_attributes)
+
+    // 儲存遊戲回合資料
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+    console.log('trade')
+    $.ajax({
+        type: "POST",
+        url: "/game/storeRound",
+
+        data: {
+            "character": character,
+            "roomid": roomid,
+            "playersData": JSON.stringify(players_attributes),
+            "playersStep": JSON.stringify(players_step),
+        },
+        success: function (data) {
+            console.log(data)
+        },
+        error: function (data) {
+            console.log(data)
+            console.log('fail')
+        }
+    })
 }
 
 let color = ''
@@ -1152,6 +1187,8 @@ Echo.join(`room.${roomid}`)
         e.character
         document.querySelector(`#${lastBtn}`).appendChild(document.getElementById(`player_${e.character}`))
 
+        //更新資料
+        players_step[`player_${e.character}`] = e.steps
         //doneMovement(e.character) 不會進入下一位
     })
     .listen('.BuildFort', (e) => {
@@ -1169,6 +1206,7 @@ Echo.join(`room.${roomid}`)
         //更新數值
         players_attributes[`player_${e.character}`].fort += 1
         players_attributes[`player_${e.character}`].money -= 3
+        players_attributes[`player_${e.character}`].time = e.time
         doneMovement(e.character)
     })
     .listen('.BuildTemple', (e) => {
@@ -1187,6 +1225,7 @@ Echo.join(`room.${roomid}`)
         //更新數值
         players_attributes[`player_${e.character}`].temple += 1
         players_attributes[`player_${e.character}`].money -= 5
+        players_attributes[`player_${e.character}`].time = e.time
         doneMovement(e.character)
     })
     .listen('.BuildCastle', (e) => { //station 驛站
@@ -1205,6 +1244,7 @@ Echo.join(`room.${roomid}`)
         //更新數值
         players_attributes[`player_${e.character}`].station += 1
         players_attributes[`player_${e.character}`].money -= 1
+        players_attributes[`player_${e.character}`].time = e.time
         doneMovement(e.character)
     })
     .listen('.Rob', (e) => {
@@ -1218,6 +1258,7 @@ Echo.join(`room.${roomid}`)
         //更新數值
         players_attributes[`player_${e.character}`].rob += 1
         players_attributes[`player_${e.character}`].money -= 3
+        players_attributes[`player_${e.character}`].time = e.time
         if (robBuilding.src.indexOf('fort') > -1) {
             players_attributes[`player_${be_robbed_id}`].fort -= 1
             if (be_robbed_id == character) { //自己被搶
@@ -1241,10 +1282,12 @@ Echo.join(`room.${roomid}`)
         players_attributes[`player_${e.character}`].sell += parseInt(e.sell)
         players_attributes[`player_${e.character}`].money = e.attributes.money
         players_attributes[`player_${e.character}`].supply = e.attributes.supply
+        players_attributes[`player_${e.character}`].time = e.time
         doneMovement(e.character)
     })
     .listen('.Cancel', (e) => {
         //console.log(e)
+        players_attributes[`player_${e.character}`].time = e.time
         doneMovement(e.character)
     })
 

@@ -65,6 +65,12 @@ Route::post('/game/doMovement', [
     'middleware' => 'auth',
 ]);
 
+Route::post('/game/storeRound', [
+    'uses' => 'GameController@storeRound',
+    'as' => 'game.storeRound',
+    'middleware' => 'auth',
+]);
+
 Route::get('/wait', [
     'uses' => 'GameController@connect',
     'as' => 'game.wait',
