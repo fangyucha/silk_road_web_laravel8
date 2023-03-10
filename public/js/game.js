@@ -67,15 +67,15 @@ let loc = "" // 地形類別
 let movement_complete_text = "" // 紀錄做的動作
 let trade_target = "" // 紀錄交易的物品
 let attributes = { // 該玩家數值
-    money: 10, station: 0, fort: 0, temple: 0, supply: 0
+    money: 5, station: 0, fort: 0, temple: 0, supply: 0
 }
 display_user_attributes(attributes) //刷新玩家數值 TODO:僅供demo用，之後要刪除，確認預設值之後可以設在html(減少刷新)
 let players_attributes = {
     //sell:賣特產獲得的金錢量
-    "player_0": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
-    "player_1": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
-    "player_2": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
-    "player_3": { money: 10, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_0": { money: 5, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_1": { money: 5, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_2": { money: 5, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
+    "player_3": { money: 5, station: 0, fort: 0, temple: 0, supply: 0, rob: 0, sell: 0, time: 0 },
 }
 let players_step = {
     "player_0": [],
@@ -137,6 +137,14 @@ function build() {
         building = 'castle'
         temp_attributes["money"] -= 1
         temp_attributes["station"] += 1
+        //檢查錢
+        if (temp_attributes["money"] < 0) {
+            movement_complete_text = "軍餉不足"
+            document.getElementById("do_movement").hidden = true
+            temp_attributes["money"] += 1
+            temp_attributes["station"] -= 1
+            return
+        }
 
     } else if (loc == "聖地") {
         movement_complete_text = "花費 $5 建造神廟"
@@ -676,7 +684,7 @@ const drop_container_dessert = document.querySelectorAll('button.butt_s[data-rol
 const step = document.querySelector('#step')
 let drop_players = document.querySelectorAll('img[data-role="player"]') // 所有玩家的位置
 step.innerHTML = parseInt(step.innerHTML) // 將步數轉成數字
-let step_num = 10 // 初始步數
+let step_num = 6 // 初始步數
 let steps = Array()
 let is_drop = false // 確認玩家有沒有放置成功
 let has_camel = false // 確認有沒有駱駝
@@ -887,7 +895,7 @@ function checkMoney(money) {
 function roundFinised() {
     attributes["supply"]++ //特產++
     attributes["money"] += attributes["station"] //驛站獲得$1
-    attributes["money"] += attributes["temple"] * 2
+    attributes["money"] += attributes["temple"] * 2 //寺廟獲得$2
     for (var i = 0; i <= 3; i++) {
         players_attributes[`player_${i}`].supply++
         players_attributes[`player_${i}`].money += players_attributes[`player_${i}`].station

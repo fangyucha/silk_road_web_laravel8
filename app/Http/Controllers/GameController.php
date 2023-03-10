@@ -62,8 +62,6 @@ class GameController extends Controller
         return redirect() -> route("game.waiting",['roomid' => $roomid]);
     }
 
-    public function 
-
     public function createNewGame(Request $request){
         $game = \App\Models\Game::create([
             'users_id' => [Auth::user()->id],
